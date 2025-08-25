@@ -1,8 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* src/app/globals.css */
+@import "tailwindcss";
 
-/* Optional global tweaks */
 body { @apply bg-gray-50 text-gray-900; }
 header { @apply bg-white shadow; }
-nav a { @apply text-blue-600 hover:text-blue-800; } 
+nav a { @apply text-blue-600 hover:text-blue-800 no-underline; }
+main { @apply p-6; }
+footer { @apply bg-white text-center text-sm text-gray-500 p-4; }
