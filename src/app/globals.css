@@ -2,10 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* optional tweaks */
+/* Optional global tweaks */
 body { @apply bg-gray-50 text-gray-900; }
 header { @apply bg-white shadow; }
-a { @apply text-blue-600 hover:text-blue-800; }
-button { @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700; }
-input, select, textarea { @apply border border-gray-300 rounded px-3 py-2; }
-nav { @apply bg-white border-b; }   
+nav a { @apply text-blue-600 hover:text-blue-800; } 
