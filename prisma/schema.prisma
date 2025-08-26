@@ -8,23 +8,54 @@ datasource db {
 }
 
 model Event {
-  id        Int       @id @default(autoincrement())
-  year      Int       @unique
+  id        Int      @id @default(autoincrement())
+  year      Int      @unique
   theme     String?
-  isActive  Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  students  Student[]
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // back-relations
+  students    Student[]
+  attendances Attendance[]
+  payments    Payment[]
 }
 
 model Student {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
   size      String
   category  String
-  event     Event     @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
   eventId   Int
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
+
+  // back-relations
+  attendances Attendance[]
+  payments    Payment[]
+  // @@unique([eventId, name]) // optional
 
   @@index([eventId])
-  // @@unique([eventId, name]) // optional
+}
+
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  student   Student  @relation(fields: [studentId], references: [id])
+  studentId Int
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   Int
+  date      DateTime @default(now())
+
+  @@index([eventId, studentId, date])
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  student   Student  @relation(fields: [studentId], references: [id])
+  studentId Int
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   Int
+  amount    Int      @default(0)
+  paidAt    DateTime @default(now())
+
+  @@index([eventId, studentId])
 }
