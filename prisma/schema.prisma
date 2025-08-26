@@ -14,3 +14,27 @@ model Event {
   isActive  Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+// Add to prisma/schema.prisma
+model Event {
+  id        Int       @id @default(autoincrement())
+  year      Int       @unique
+  theme     String?
+  isActive  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  students  Student[]
+}
+
+model Student {
+  id        Int       @id @default(autoincrement())
+  name      String
+  size      String
+  category  String
+  event     Event     @relation(fields: [eventId], references: [id])
+  eventId   Int
+  createdAt DateTime  @default(now())
+
+  @@index([eventId])
+  // Optional: enforce unique names per event
+  // @@unique([eventId, name])
+}
