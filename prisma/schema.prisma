@@ -1,3 +1,5 @@
+// prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,6 +9,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// --- Core Models ---
+
 model Event {
   id        Int      @id @default(autoincrement())
   year      Int      @unique
@@ -14,10 +18,10 @@ model Event {
   isActive  Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  // back-relations
   students    Student[]
   attendances Attendance[]
   payments    Payment[]
+  sessions    Session[]
 }
 
 model Student {
@@ -29,13 +33,14 @@ model Student {
   eventId   Int
   createdAt DateTime @default(now())
 
-  // back-relations
   attendances Attendance[]
   payments    Payment[]
   // @@unique([eventId, name]) // optional
 
   @@index([eventId])
 }
+
+// --- Attendance & Payment ---
 
 model Attendance {
   id        Int      @id @default(autoincrement())
@@ -58,4 +63,22 @@ model Payment {
   paidAt    DateTime @default(now())
 
   @@index([eventId, studentId])
+}
+
+// --- Schedule Sessions ---
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   Int
+  title     String
+  start     DateTime
+  end       DateTime
+  location  String?
+  group     String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId, start])
 }
