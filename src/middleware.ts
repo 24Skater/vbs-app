@@ -17,10 +17,11 @@ export default withAuth(
 
     // Rate limiting for authentication endpoints
     if (path.startsWith("/api/auth/signin") || path.startsWith("/api/auth/callback")) {
+      const { RATE_LIMIT_WINDOW_MS, RATE_LIMIT_MAX_REQUESTS } = await import("@/lib/constants");
       const identifier = getClientIdentifier(req);
       const rateLimit = checkRateLimit(identifier, {
-        windowMs: 15 * 60 * 1000, // 15 minutes
-        maxRequests: 5, // 5 requests per 15 minutes
+        windowMs: RATE_LIMIT_WINDOW_MS,
+        maxRequests: RATE_LIMIT_MAX_REQUESTS,
       });
 
       if (!rateLimit.success) {
@@ -41,7 +42,7 @@ export default withAuth(
       }
 
       // Add rate limit headers
-      response.headers.set("X-RateLimit-Limit", "5");
+      response.headers.set("X-RateLimit-Limit", String(RATE_LIMIT_MAX_REQUESTS));
       response.headers.set("X-RateLimit-Remaining", String(rateLimit.remaining));
       response.headers.set("X-RateLimit-Reset", String(rateLimit.resetAt));
     }

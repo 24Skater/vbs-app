@@ -5,7 +5,7 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import EmailProvider from "next-auth/providers/email";
 import { prisma } from "@/lib/prisma";
-import { UserRole } from "@/lib/constants";
+import { UserRole, SESSION_MAX_AGE_SEC, SESSION_UPDATE_AGE_SEC } from "@/lib/constants";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
@@ -61,7 +61,10 @@ export const authOptions: NextAuthOptions = {
         if (dbUser && !dbUser.emailVerified) {
           // In production, you might want to be stricter and require verification
           // For now, we'll allow it but log it
-          console.warn(`Unverified user attempting to sign in: ${user.email}`);
+          // TODO: Replace with proper logging service in production
+          if (process.env.NODE_ENV === "development") {
+            console.warn(`Unverified user attempting to sign in: ${user.email}`);
+          }
         }
       }
 
@@ -84,8 +87,8 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "database",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
+    maxAge: SESSION_MAX_AGE_SEC, // 30 days
+    updateAge: SESSION_UPDATE_AGE_SEC, // 24 hours
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

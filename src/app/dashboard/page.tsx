@@ -12,18 +12,27 @@ export default async function Dashboard() {
     const event = await getActiveEvent();
     const categories = await getCategories(event.id);
 
-    // Get total count
-    const total = await prisma.student.count({ where: { eventId: event.id } });
+    // Get total count and category counts in a single query (fixes N+1)
+    const students = await prisma.student.findMany({
+      where: { eventId: event.id },
+      select: { category: true },
+    });
 
-    // Get counts for each category
-    const categoryCounts = await Promise.all(
-      categories.map(async (category) => ({
-        name: category.name,
-        count: await prisma.student.count({
-          where: { eventId: event.id, category: category.name },
-        }),
-      }))
-    );
+    const total = students.length;
+    
+    // Count by category
+    const categoryCountsMap = new Map<string, number>();
+    categories.forEach((cat) => categoryCountsMap.set(cat.name, 0));
+    
+    students.forEach((student) => {
+      const count = categoryCountsMap.get(student.category) || 0;
+      categoryCountsMap.set(student.category, count + 1);
+    });
+
+    const categoryCounts = categories.map((category) => ({
+      name: category.name,
+      count: categoryCountsMap.get(category.name) || 0,
+    }));
 
     return (
       <div className="space-y-6">

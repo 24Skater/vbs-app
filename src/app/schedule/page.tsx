@@ -4,6 +4,8 @@ import { getActiveEvent } from "@/lib/event";
 import { requireRole } from "@/lib/auth";
 import { getCategories } from "@/lib/categories";
 import { scheduleSessionSchema } from "@/lib/validation";
+import { toDateTimeLocal } from "@/lib/date-utils";
+import { MAX_FUTURE_YEARS } from "@/lib/constants";
 import Link from "next/link";
 import CategorySelect from "@/components/CategorySelect";
 
@@ -37,9 +39,9 @@ export async function createSession(formData: FormData) {
 
   // Additional validation: ensure dates are reasonable
   const now = new Date();
-  const maxFuture = new Date(now.getFullYear() + 10, 11, 31);
+  const maxFuture = new Date(now.getFullYear() + MAX_FUTURE_YEARS, 11, 31);
   if (data.start > maxFuture || data.end > maxFuture) {
-    throw new Error("Session dates cannot be more than 10 years in the future.");
+    throw new Error(`Session dates cannot be more than ${MAX_FUTURE_YEARS} years in the future.`);
   }
 
   await prisma.scheduleSession.create({
@@ -59,39 +61,22 @@ export async function createSession(formData: FormData) {
 
 export async function deleteSession(formData: FormData) {
   "use server";
+  const { verifySessionAccess } = await import("@/lib/resource-access");
+  const { validateId } = await import("@/lib/resource-access");
+
   await requireRole("STAFF");
 
   const idInput = formData.get("id");
-  const id = idInput ? Number(idInput) : null;
 
-  if (!id || !Number.isInteger(id) || id <= 0) {
-    throw new Error("Invalid session ID");
-  }
-
-  // Verify session exists and belongs to active event (IDOR protection)
-  const event = await getActiveEvent();
-  const session = await prisma.scheduleSession.findUnique({
-    where: { id },
-    select: { id: true, eventId: true },
-  });
-
-  if (!session) {
-    throw new Error("Session not found");
-  }
-
-  if (session.eventId !== event.id) {
-    throw new Error("Session does not belong to the active event");
-  }
+  // Validate and verify access (IDOR protection)
+  const id = validateId(idInput, "Session");
+  await verifySessionAccess(id);
 
   await prisma.scheduleSession.delete({ where: { id } });
   revalidatePath("/schedule");
 }
 
 /* ───────────────── Page ───────────────── */
-function toLocal(dt: Date | string) {
-  const d = typeof dt === "string" ? new Date(dt) : dt;
-  return d.toISOString().slice(0, 16); // datetime-local value
-}
 
 export default async function SchedulePage() {
   await requireRole("STAFF");
@@ -172,7 +157,7 @@ export default async function SchedulePage() {
             </tr>
           </thead>
           <tbody>
-            {sessions.map((s: { id: number; title: string; start: Date; end: Date; location: string | null; group: string | null; notes: string | null }) => (
+            {sessions.map((s) => (
               <tr key={s.id} className="border-t text-sm">
                 <td className="px-4 py-2">{s.title}</td>
                 <td className="px-4 py-2">

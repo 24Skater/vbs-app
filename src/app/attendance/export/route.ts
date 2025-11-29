@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getActiveEvent } from "@/lib/event";
 import { requireRole } from "@/lib/auth";
+import { AppError } from "@/lib/errors";
 
 function rangeForDate(iso?: string) {
   const base = iso ? new Date(iso) : new Date();
@@ -56,12 +57,12 @@ export async function GET(req: Request) {
       },
     });
   } catch (error) {
+    const statusCode = error instanceof AppError ? error.statusCode : 500;
+    const message = error instanceof Error ? error.message : "Failed to export attendance";
+    
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Failed to export attendance",
-      },
-      { status: error instanceof Error && "statusCode" in error ? (error as any).statusCode : 500 }
+      { error: message },
+      { status: statusCode }
     );
   }
 }

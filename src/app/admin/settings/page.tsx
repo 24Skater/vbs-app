@@ -4,6 +4,7 @@ import { getSettings, updateSettings } from "@/lib/settings";
 import { requireRole } from "@/lib/auth";
 import { ValidationError } from "@/lib/errors";
 import { auditLog } from "@/lib/audit-log";
+import { MAX_SITE_NAME_LENGTH, MAX_URL_LENGTH } from "@/lib/constants";
 
 async function updateSettingsAction(formData: FormData) {
   "use server";
@@ -17,8 +18,8 @@ async function updateSettingsAction(formData: FormData) {
   if (!siteName || siteName.length === 0) {
     throw new ValidationError("Site name is required");
   }
-  if (siteName.length > 100) {
-    throw new ValidationError("Site name must be 100 characters or less");
+  if (siteName.length > MAX_SITE_NAME_LENGTH) {
+    throw new ValidationError(`Site name must be ${MAX_SITE_NAME_LENGTH} characters or less`);
   }
 
   // Validate primaryColor
@@ -33,8 +34,8 @@ async function updateSettingsAction(formData: FormData) {
   if (logoUrl) {
     try {
       new URL(logoUrl);
-      if (logoUrl.length > 500) {
-        throw new ValidationError("Logo URL must be 500 characters or less");
+      if (logoUrl.length > MAX_URL_LENGTH) {
+        throw new ValidationError(`Logo URL must be ${MAX_URL_LENGTH} characters or less`);
       }
     } catch {
       throw new ValidationError("Logo URL must be a valid URL");

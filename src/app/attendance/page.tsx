@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getActiveEvent } from "@/lib/event";
 import { requireRole } from "@/lib/auth";
 import { getCategories } from "@/lib/categories";
-import { attendanceDeleteSchema } from "@/lib/validation";
+import { getDayRange } from "@/lib/date-utils";
 import AttendanceControls from "../../components/AttendanceControls";
 
 /* ---------- Server Action: Undo (delete one attendance row) ---------- */
@@ -84,7 +84,7 @@ export default async function AttendancePage({ searchParams }: PageProps) {
     );
   }
 
-  const { start, end } = rangeForDate(date);
+  const { start, end } = getDayRange(date);
   const categories = await getCategories(event.id);
 
   // Pull today's attendance (filtered)

@@ -3,42 +3,33 @@ import { prisma } from "@/lib/prisma";
 import { getActiveEvent } from "@/lib/event";
 import { requireRole } from "@/lib/auth";
 import { getCategories } from "@/lib/categories";
+import { getTodayRange } from "@/lib/date-utils";
 import CheckinControls from "@/components/CheckinControls";
 import { escapeHtml } from "@/lib/xss-protection";
 
 /* ── Server Action: check a student in for TODAY ───────────────────────── */
 export async function checkInById(studentId: number) {
   "use server";
+  const { verifyStudentAccess } = await import("@/lib/resource-access");
+  const { validateId } = await import("@/lib/resource-access");
+  const { getTodayRange } = await import("@/lib/date-utils");
 
   await requireRole("STAFF");
 
   // Validate studentId
-  if (!studentId || !Number.isInteger(studentId) || studentId <= 0) {
-    throw new Error("Invalid student ID");
-  }
+  const validId = validateId(studentId, "Student");
+
+  // Verify student access (IDOR protection)
+  await verifyStudentAccess(validId);
 
   const event = await getActiveEvent();
 
-  // Verify student exists and belongs to active event (IDOR protection)
-  const student = await prisma.student.findUnique({
-    where: { id: studentId },
-    select: { id: true, eventId: true },
-  });
-
-  if (!student) {
-    throw new Error("Student not found");
-  }
-
-  if (student.eventId !== event.id) {
-    throw new Error("Student does not belong to the active event");
-  }
-
-  const { start, end } = todayRange();
+  const { start, end } = getTodayRange();
 
   // idempotent: if already checked in today, do nothing
   const already = await prisma.attendance.findFirst({
     where: {
-      studentId,
+      studentId: validId,
       eventId: event.id,
       date: { gte: start, lt: end },
     },
@@ -47,19 +38,11 @@ export async function checkInById(studentId: number) {
 
   if (!already) {
     await prisma.attendance.create({
-      data: { studentId, eventId: event.id },
+      data: { studentId: validId, eventId: event.id },
     });
   }
 
   revalidatePath("/checkin");
-}
-
-/* ── Helpers ───────────────────────────────────────────────────────────── */
-function todayRange() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  return { start, end };
 }
 
 type PageProps = {
@@ -93,7 +76,7 @@ export default async function CheckInPage({ searchParams }: PageProps) {
     );
   }
 
-  const { start, end } = todayRange();
+  const { start, end } = getTodayRange();
   const categories = await getCategories(event.id);
 
   // Load students + whether they have an attendance entry today

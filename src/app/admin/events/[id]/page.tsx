@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { ValidationError } from "@/lib/errors";
 import { auditLog } from "@/lib/audit-log";
+import { MIN_YEAR, MAX_YEAR, MAX_THEME_LENGTH } from "@/lib/constants";
 
 async function updateEvent(id: number, formData: FormData) {
   "use server";
@@ -30,8 +31,8 @@ async function updateEvent(id: number, formData: FormData) {
   const setActive = formData.get("setActive") === "on";
 
   // Validate year
-  if (!year || isNaN(year) || year < 2000 || year > 2100) {
-    throw new ValidationError("Year must be between 2000 and 2100");
+  if (!year || isNaN(year) || year < MIN_YEAR || year > MAX_YEAR) {
+    throw new ValidationError(`Year must be between ${MIN_YEAR} and ${MAX_YEAR}`);
   }
 
   // Validate dates
@@ -46,8 +47,8 @@ async function updateEvent(id: number, formData: FormData) {
   }
 
   // Validate theme length
-  if (theme && theme.length > 200) {
-    throw new ValidationError("Theme must be 200 characters or less");
+  if (theme && theme.length > MAX_THEME_LENGTH) {
+    throw new ValidationError(`Theme must be ${MAX_THEME_LENGTH} characters or less`);
   }
 
   // Check if year is taken by another event

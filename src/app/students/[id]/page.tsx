@@ -10,39 +10,26 @@ export async function checkInAction(studentId: number) {
   "use server";
   const { requireRole } = await import("@/lib/auth");
   const { getActiveEvent } = await import("@/lib/event");
-  const { ValidationError } = await import("@/lib/errors");
+  const { verifyStudentAccess } = await import("@/lib/resource-access");
+  const { validateId } = await import("@/lib/resource-access");
+  const { getTodayRange } = await import("@/lib/date-utils");
   
   await requireRole("STAFF");
   
   // Validate studentId
-  if (!studentId || !Number.isInteger(studentId) || studentId <= 0) {
-    throw new ValidationError("Invalid student ID");
-  }
+  const validId = validateId(studentId, "Student");
+
+  // Verify student access (IDOR protection)
+  await verifyStudentAccess(validId);
 
   const event = await getActiveEvent();
 
-  // Verify student exists and belongs to active event (IDOR protection)
-  const student = await prisma.student.findUnique({
-    where: { id: studentId },
-    select: { id: true, eventId: true },
-  });
-
-  if (!student) {
-    throw new ValidationError("Student not found");
-  }
-
-  if (student.eventId !== event.id) {
-    throw new ValidationError("Student does not belong to the active event");
-  }
-
   // Check if already checked in today (idempotent)
-  const today = new Date();
-  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const { start, end } = getTodayRange();
 
   const existing = await prisma.attendance.findFirst({
     where: {
-      studentId,
+      studentId: validId,
       eventId: event.id,
       date: { gte: start, lt: end },
     },
@@ -50,55 +37,43 @@ export async function checkInAction(studentId: number) {
 
   if (!existing) {
     await prisma.attendance.create({
-      data: { studentId, eventId: event.id },
+      data: { studentId: validId, eventId: event.id },
     });
   }
 
-  revalidatePath(`/students/${studentId}`);
+  revalidatePath(`/students/${validId}`);
 }
 
 export async function togglePaidAction(studentId: number) {
   "use server";
   const { requireRole } = await import("@/lib/auth");
   const { getActiveEvent } = await import("@/lib/event");
-  const { ValidationError } = await import("@/lib/errors");
+  const { verifyStudentAccess } = await import("@/lib/resource-access");
+  const { validateId } = await import("@/lib/resource-access");
   
   await requireRole("STAFF");
   
   // Validate studentId
-  if (!studentId || !Number.isInteger(studentId) || studentId <= 0) {
-    throw new ValidationError("Invalid student ID");
-  }
+  const validId = validateId(studentId, "Student");
+
+  // Verify student access (IDOR protection)
+  await verifyStudentAccess(validId);
 
   const event = await getActiveEvent();
 
-  // Verify student exists and belongs to active event (IDOR protection)
-  const student = await prisma.student.findUnique({
-    where: { id: studentId },
-    select: { id: true, eventId: true },
-  });
-
-  if (!student) {
-    throw new ValidationError("Student not found");
-  }
-
-  if (student.eventId !== event.id) {
-    throw new ValidationError("Student does not belong to the active event");
-  }
-
   const existing = await prisma.payment.findFirst({
-    where: { studentId, eventId: event.id },
+    where: { studentId: validId, eventId: event.id },
   });
 
   if (existing) {
     await prisma.payment.delete({ where: { id: existing.id } });
   } else {
     await prisma.payment.create({
-      data: { studentId, eventId: event.id, amount: 0 },
+      data: { studentId: validId, eventId: event.id, amount: 0 },
     });
   }
 
-  revalidatePath(`/students/${studentId}`);
+  revalidatePath(`/students/${validId}`);
 }
 
 /* ────────────────────────── Page ────────────────────────── */

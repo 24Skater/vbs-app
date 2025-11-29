@@ -5,6 +5,10 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { ValidationError } from "@/lib/errors";
 import { auditLog } from "@/lib/audit-log";
+import {
+  MAX_CATEGORY_NAME_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+} from "@/lib/constants";
 
 async function updateCategoryAction(id: number, formData: FormData) {
   "use server";
@@ -32,13 +36,13 @@ async function updateCategoryAction(id: number, formData: FormData) {
   if (!name || name.length === 0) {
     throw new ValidationError("Name is required");
   }
-  if (name.length > 100) {
-    throw new ValidationError("Name must be 100 characters or less");
+  if (name.length > MAX_CATEGORY_NAME_LENGTH) {
+    throw new ValidationError(`Name must be ${MAX_CATEGORY_NAME_LENGTH} characters or less`);
   }
 
   // Validate description
-  if (description && description.length > 500) {
-    throw new ValidationError("Description must be 500 characters or less");
+  if (description && description.length > MAX_DESCRIPTION_LENGTH) {
+    throw new ValidationError(`Description must be ${MAX_DESCRIPTION_LENGTH} characters or less`);
   }
 
   // Validate color (hex format)
