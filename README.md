@@ -1,5 +1,16 @@
 # VBS App - Vacation Bible School Management System
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node.js](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)
+![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.4.5-blue)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-blue)
+![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
+![Contributors](https://img.shields.io/github/contributors/YOUR_USERNAME/vbs-app)
+![Issues](https://img.shields.io/github/issues/YOUR_USERNAME/vbs-app)
+![Pull Requests](https://img.shields.io/github/issues-pr/YOUR_USERNAME/vbs-app)
+![Security](https://img.shields.io/badge/security-policy-yellow.svg)
+
 A comprehensive, self-hosted application for managing Vacation Bible School events, students, attendance, and schedules.
 
 ## Features
@@ -246,7 +257,9 @@ See `Docs/SECURITY_COMPLETE.md` for detailed security documentation.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to contribute to this project.
+
+Please note that this project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
 ## License
 
