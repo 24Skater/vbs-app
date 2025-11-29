@@ -48,7 +48,7 @@ export default async function Home() {
             {session?.user ? (
               <Link
                 href="/dashboard"
-                className="rounded-md px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+                className="rounded-md px-6 py-3 text-base font-semibold text-white shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 style={{ backgroundColor: settings.primaryColor }}
               >
                 Dashboard
@@ -56,7 +56,7 @@ export default async function Home() {
             ) : (
               <Link
                 href="/auth/signin"
-                className="rounded-md px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+                className="rounded-md px-6 py-3 text-base font-semibold text-white shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 style={{ backgroundColor: settings.primaryColor }}
               >
                 Sign In

@@ -1,447 +1,224 @@
-# VBS App
+# VBS App - Vacation Bible School Management System
 
-A self-hostable Vacation Bible School (VBS) management application designed for churches to manage student registration, check-ins, attendance tracking, payments, and schedules. Built with modern web technologies and designed for easy deployment and maintenance.
+A comprehensive, self-hosted application for managing Vacation Bible School events, students, attendance, and schedules.
 
-## What is This App?
+## Features
 
-VBS App is a complete management system for Vacation Bible School programs. It helps churches:
-
-- **Manage Students** - Register and organize students by categories (Youth, Jóvenes, etc.)
-- **Track Attendance** - Daily check-in system with attendance history
-- **Monitor Payments** - Track payment status for registered students
-- **Schedule Events** - Create and manage VBS schedules with calendar export
-- **Generate Reports** - Export attendance data to CSV
-- **Multi-Event Support** - Manage multiple VBS events (2024, 2025, etc.) in one system
-
-### Key Features
-
-- 🔐 **Secure Authentication** - Email-based magic link authentication with role-based access
-- 👥 **Student Management** - Register and manage students with custom categories
-- ✅ **Check-In System** - Quick daily check-in interface for staff
-- 📊 **Attendance Tracking** - View and export attendance records by date
-- 💰 **Payment Tracking** - Track payment status for students
-- 📅 **Schedule Management** - Create schedules with calendar export (ICS format)
-- 🎯 **Multi-Event Support** - Support for multiple VBS events with active event selection
-- 🎨 **Customizable** - Admin panel for customizing categories, branding, and settings
-- 📱 **Responsive Design** - Works on desktop, tablet, and mobile devices
-- 🐳 **Docker Support** - Easy deployment with Docker and Docker Compose
+- **Student Management**: Register and manage students with categories, sizes, and payment tracking
+- **Quick Check-In**: Fast and efficient daily attendance tracking
+- **Schedule Management**: Create and manage event schedules with sessions, locations, and groups
+- **Attendance Records**: View and export attendance data
+- **Admin Panel**: Configure events, users, categories, and application settings
+- **Role-Based Access Control**: Admin, Staff, and Viewer roles
+- **Branding Customization**: Customize site name, logo, and colors from the admin panel
+- **Modern Landing Page**: Beautiful, responsive landing page with admin-configurable branding
 
 ## Tech Stack
 
 - **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript
 - **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: NextAuth.js v5 (Auth.js)
+- **Authentication**: NextAuth.js v5 (Auth.js) with email magic links
 - **Styling**: Tailwind CSS
 - **Validation**: Zod
+- **Deployment**: Docker & Docker Compose
 
 ## Prerequisites
 
-Before setting up, ensure you have:
+- Node.js 20+ and npm
+- Docker and Docker Compose (for database or full deployment)
+- PostgreSQL 16+ (if not using Docker)
 
-- **Node.js 20+** and npm installed
-- **PostgreSQL 16+** (or Docker for containerized setup)
-- **Email service** for authentication (SMTP or Resend)
-- **Basic terminal/command line knowledge**
+## Quick Start (Development)
 
-## Initial Setup
-
-### Step 1: Clone and Install
+### 1. Clone the repository
 
 ```bash
-# Clone the repository
 git clone <repository-url>
 cd vbs-app
+```
 
-# Install dependencies
+### 2. Install dependencies
+
+```bash
 npm install
 ```
 
-### Step 2: Environment Configuration
+### 3. Set up environment variables
 
 Create a `.env` file in the root directory:
 
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and configure the following:
-
 ```env
-# Database Connection
+# Database
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/vbsdb?schema=public"
 
-# NextAuth Configuration
+# NextAuth
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="generate-a-random-secret-here"
+NEXTAUTH_SECRET="your-secret-here"  # Generate with: openssl rand -base64 32
 
-# Email Configuration (choose one method)
-
-# Option 1: SMTP
-EMAIL_FROM="noreply@yourdomain.com"
+# Email (optional for development - magic links will be logged to console)
+EMAIL_FROM="noreply@example.com"
 EMAIL_SERVER_HOST="smtp.example.com"
-EMAIL_SERVER_PORT=587
-EMAIL_SERVER_USER="user@example.com"
-EMAIL_SERVER_PASSWORD="password"
+EMAIL_SERVER_PORT="587"
+EMAIL_SERVER_USER="your-email@example.com"
+EMAIL_SERVER_PASSWORD="your-password"
 EMAIL_SERVER_SECURE="false"
-
-# Option 2: Resend (recommended for production)
-# RESEND_API_KEY="re_xxxxxxxxxxxxx"
-# EMAIL_FROM="noreply@yourdomain.com"
 ```
 
-**Important**: Generate a secure `NEXTAUTH_SECRET`:
+**Generate NEXTAUTH_SECRET:**
+- **Windows (PowerShell)**: `[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Minimum 0 -Maximum 256 }))`
+- **Windows (Git Bash)**: `openssl rand -base64 32`
+- **Mac/Linux**: `openssl rand -base64 32`
 
-```bash
-openssl rand -base64 32
-```
-
-### Step 3: Start Database
-
-#### Option A: Using Docker (Recommended for Development)
+### 4. Start the database
 
 ```bash
 docker compose up -d
 ```
 
-#### Option B: Using Existing PostgreSQL
+This starts only the PostgreSQL database in Docker.
 
-- Create a database named `vbsdb` (or update `DATABASE_URL`)
-- Ensure PostgreSQL is running
-
-### Step 4: Run Database Migrations
-
-This creates all necessary database tables:
+### 5. Run database migrations
 
 ```bash
 npx prisma migrate dev
 ```
 
-### Step 5: Seed Initial Data (Optional)
+### 6. Seed the database (optional)
 
 ```bash
-# Creates default categories and a demo event
 npx tsx prisma/seed.ts
 ```
 
-### Step 6: Start Development Server
+### 7. Start the development server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Step 7: Create Your First Admin User
-
-1. Navigate to the sign-in page
-2. Enter your email address
-3. Check your email for the magic link
-4. Sign in with the link
-5. Set your role to ADMIN in the database:
-
-```sql
-UPDATE "User" SET role = 'ADMIN' WHERE email = 'your-email@example.com';
-```
-
-Or use Prisma Studio:
-
-```bash
-npx prisma studio
-# Navigate to User table and change role to ADMIN
-```
-
-### Step 8: Create Your First Event
-
-1. Sign in as admin
-2. Go to `/admin/events`
-3. Click "Create Event"
-4. Enter year, theme, and dates
-5. Check "Set as active event"
-6. Click "Create Event"
+The app will be available at `http://localhost:3000` with **hot reloading** - changes will appear instantly without rebuilding!
 
 ## Production Deployment
 
 ### Using Docker Compose (Recommended)
 
-1. **Configure Production Environment**
+1. **Set up environment variables**
 
-   Create a `.env` file with production values:
+   Create a `.env` file with all required variables (see Quick Start section).
 
-   ```env
-   DATABASE_URL="postgresql://user:password@db:5432/vbsdb?schema=public"
-   NEXTAUTH_URL="https://yourdomain.com"
-   NEXTAUTH_SECRET="your-production-secret"
-   EMAIL_FROM="noreply@yourdomain.com"
-   # ... other environment variables
-   ```
-
-2. **Build and Start Services**
+2. **Start the services**
 
    ```bash
-   docker compose -f docker-compose.prod.yml up -d
+   docker compose -f docker-compose.prod.yml up -d --build
    ```
 
-3. **Run Migrations**
+3. **Run database migrations**
 
    ```bash
    docker compose -f docker-compose.prod.yml exec app npx prisma migrate deploy
    ```
 
-4. **Initialize Default Data**
+4. **Seed the database (optional)**
 
    ```bash
    docker compose -f docker-compose.prod.yml exec app npx tsx prisma/seed.ts
    ```
 
+The app will be available at `http://localhost:3000` (or your configured port).
+
 ### Manual Deployment
 
-1. **Build the Application**
+1. **Install dependencies**
+
+   ```bash
+   npm ci
+   ```
+
+2. **Set up the database**
+
+   - Create a PostgreSQL database
+   - Update `DATABASE_URL` in `.env`
+   - Run migrations: `npx prisma migrate deploy`
+
+3. **Build the application**
 
    ```bash
    npm run build
    ```
 
-2. **Start Production Server**
+4. **Start the production server**
 
    ```bash
    npm start
    ```
 
-3. **Run Migrations**
-
-   ```bash
-   npx prisma migrate deploy
-   ```
-
-4. **Set Up Process Manager** (Recommended)
-
-   Use PM2 or similar:
-
-   ```bash
-   npm install -g pm2
-   pm2 start npm --name "vbs-app" -- start
-   pm2 save
-   pm2 startup
-   ```
-
 ## User Roles
 
-The application has three user roles:
+- **ADMIN**: Full access to all features, including admin panel
+- **STAFF**: Can manage students, attendance, and schedules
+- **VIEWER**: Read-only access to view data
 
-- **ADMIN** - Full access including admin panel for managing events, users, categories, and settings
-- **STAFF** - Can manage students, check-ins, attendance, and schedules
-- **VIEWER** - Read-only access to dashboard
+## First-Time Setup
 
-## Admin Panel
+1. **Sign in**: Go to `/auth/signin` and enter your email
+2. **Check logs**: In development mode, the magic link will be logged to the console
+3. **Set admin role**: The first user needs to be manually set as ADMIN in the database:
 
-Access the admin panel at `/admin` (requires ADMIN role) to:
+   ```sql
+   UPDATE "User" SET role = 'ADMIN' WHERE email = 'your-email@example.com';
+   ```
 
-- **Events** - Create, edit, and activate VBS events
-- **Users** - Manage user accounts and roles
-- **Categories** - Create and customize student categories
-- **Settings** - Customize site name, colors, and branding
-
-See [ADMIN_PANEL.md](./Docs/ADMIN_PANEL.md) for detailed admin panel documentation.
-
-## Maintaining the Application
-
-### When New Updates Are Released
-
-Follow these steps to update your installation:
-
-#### Step 1: Backup Your Database
-
-**Before any update, always backup your database!**
-
-Using pg_dump:
-
-```bash
-pg_dump -U postgres vbsdb > backup_$(date +%Y%m%d).sql
-```
-
-Or using Docker:
-
-```bash
-docker compose exec db pg_dump -U postgres vbsdb > backup_$(date +%Y%m%d).sql
-```
-
-#### Step 2: Pull Latest Code
-
-```bash
-# If using git
-git pull origin main
-
-# Or download the latest release
-```
-
-#### Step 3: Update Dependencies
-
-```bash
-npm install
-```
-
-#### Step 4: Apply Database Migrations
-
-```bash
-# Development
-npx prisma migrate dev
-
-# Production
-npx prisma migrate deploy
-```
-
-#### Step 5: Rebuild and Restart
-
-If using Docker:
-
-```bash
-docker compose -f docker-compose.prod.yml down
-docker compose -f docker-compose.prod.yml build
-docker compose -f docker-compose.prod.yml up -d
-```
-
-If using manual deployment:
-
-```bash
-npm run build
-# Restart your process manager (PM2, systemd, etc.)
-pm2 restart vbs-app
-```
-
-#### Step 6: Verify Everything Works
-
-1. Check the application loads: `https://yourdomain.com`
-2. Test sign-in functionality
-3. Verify admin panel is accessible
-4. Check that existing data is intact
-
-### Regular Maintenance Tasks
-
-#### Weekly
-
-- **Check for Updates**: Review the repository for new releases
-- **Review Logs**: Check application logs for errors
-- **Verify Backups**: Ensure database backups are running
-
-#### Monthly
-
-- **Update Dependencies**: Run `npm audit` and update packages
-- **Review User Accounts**: Check for inactive or unauthorized users
-- **Database Maintenance**: Consider running `VACUUM` on PostgreSQL
-
-#### Before Each VBS Event
-
-- **Create New Event**: Use admin panel to create event for the year
-- **Set Active Event**: Activate the new event
-- **Review Categories**: Update student categories if needed
-- **Test Check-In**: Verify check-in process works
-- **Train Staff**: Ensure staff know how to use the system
-
-### Database Backups
-
-#### Automated Backup Script
-
-Add this to cron for automated backups:
-
-```bash
-#!/bin/bash
-# backup.sh
-DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/path/to/backups"
-pg_dump -U postgres vbsdb > "$BACKUP_DIR/vbsdb_$DATE.sql"
-# Keep only last 30 days
-find "$BACKUP_DIR" -name "vbsdb_*.sql" -mtime +30 -delete
-```
-
-#### Restore from Backup
-
-```bash
-psql -U postgres vbsdb < backup_20240101.sql
-```
-
-### Troubleshooting
-
-#### Application Won't Start
-
-1. Check environment variables are set correctly
-2. Verify database is running and accessible
-3. Check logs: `docker compose logs app` or application logs
-4. Ensure port 3000 is not in use
-
-#### Database Connection Errors
-
-1. Verify `DATABASE_URL` is correct
-2. Check PostgreSQL is running: `docker compose ps` or `systemctl status postgresql`
-3. Test connection: `psql $DATABASE_URL`
-
-#### Authentication Not Working
-
-1. Verify `NEXTAUTH_SECRET` is set
-2. Check `NEXTAUTH_URL` matches your domain
-3. Verify email service is configured correctly
-4. Check email service logs for delivery issues
-
-#### Migration Errors
-
-1. **Always backup before migrations!**
-2. Check Prisma migration status: `npx prisma migrate status`
-3. Review migration files in `prisma/migrations/`
-4. If stuck, you may need to reset (development only):
+   Or use Prisma Studio:
 
    ```bash
-   npx prisma migrate reset  # WARNING: Deletes all data!
+   npx prisma studio
    ```
+
+4. **Configure settings**: Go to `/admin/settings` to customize:
+   - Site name
+   - Primary color
+   - Logo URL
+
+5. **Create an event**: Go to `/admin/events/new` to create your first VBS event
+6. **Set active event**: Mark the event as active in `/admin/events`
 
 ## Project Structure
 
-```text
+```
 vbs-app/
 ├── prisma/
-│   ├── schema.prisma          # Database schema
-│   ├── migrations/            # Database migrations
-│   └── seed.ts               # Seed scripts
+│   ├── schema.prisma      # Database schema
+│   ├── migrations/        # Database migrations
+│   └── seed.ts           # Seed script
 ├── src/
-│   ├── app/                  # Next.js app router pages
-│   │   ├── admin/           # Admin panel pages
-│   │   ├── api/             # API routes
-│   │   ├── auth/            # Authentication pages
-│   │   └── ...              # Feature pages
-│   ├── components/          # React components
-│   └── lib/                 # Utilities and helpers
-│       ├── auth.ts          # Authentication utilities
-│       ├── event.ts         # Event management
-│       ├── categories.ts    # Category management
-│       ├── settings.ts      # Settings management
-│       └── ...
-├── docker-compose.yml       # Development Docker setup
-├── docker-compose.prod.yml  # Production Docker setup
-└── Dockerfile              # Production Docker image
+│   ├── app/              # Next.js app router pages
+│   │   ├── admin/        # Admin panel pages
+│   │   ├── auth/         # Authentication pages
+│   │   └── api/          # API routes
+│   ├── components/       # React components
+│   └── lib/              # Utility functions and configurations
+├── public/               # Static assets
+├── docker-compose.yml    # Development database only
+├── docker-compose.prod.yml  # Production deployment
+├── Dockerfile            # Production Docker image
+└── README.md
 ```
 
 ## Database Management
 
-### Prisma Studio (Visual Database Editor)
+### Run migrations
 
-View and edit data in a visual interface:
+```bash
+npx prisma migrate dev
+```
+
+### Open Prisma Studio
 
 ```bash
 npx prisma studio
 ```
 
-Opens at `http://localhost:5555`
-
-### Create Migration
-
-When schema changes are needed:
-
-```bash
-npx prisma migrate dev --name description_of_change
-```
-
-### Reset Database (Development Only)
-
-⚠️ **WARNING**: This deletes all data!
+### Reset database (development only)
 
 ```bash
 npx prisma migrate reset
@@ -449,84 +226,40 @@ npx prisma migrate reset
 
 ## Email Configuration
 
-### Using Resend (Recommended for Production)
+For production, configure SMTP settings in your `.env` file. The app supports any SMTP provider (Gmail, SendGrid, AWS SES, etc.).
 
-1. Sign up at [resend.com](https://resend.com)
-2. Get your API key
-3. Add to `.env`:
-
-   ```env
-   RESEND_API_KEY="re_xxxxxxxxxxxxx"
-   EMAIL_FROM="noreply@yourdomain.com"
-   ```
-
-### Using SMTP
-
-Configure your SMTP server details in `.env`:
-
-```env
-EMAIL_FROM="noreply@yourdomain.com"
-EMAIL_SERVER_HOST="smtp.example.com"
-EMAIL_SERVER_PORT=587
-EMAIL_SERVER_USER="user@example.com"
-EMAIL_SERVER_PASSWORD="password"
-EMAIL_SERVER_SECURE="false"
-```
+In development mode, if email is not configured, magic links will be logged to the console instead of being sent via email.
 
 ## Security Considerations
 
-- **Change NEXTAUTH_SECRET** in production (use a strong random value)
-- **Use HTTPS** in production (set `NEXTAUTH_URL` to HTTPS)
-- **Secure your database** with strong passwords
-- **Limit email access** to trusted users only
-- **Regular backups** of your PostgreSQL database
-- **Keep dependencies updated**: Run `npm audit` regularly
-- **Review user roles** periodically to ensure proper access control
+- All user inputs are validated using Zod schemas
+- SQL injection protection via Prisma ORM
+- XSS protection with HTML escaping
+- CSRF protection via NextAuth and Next.js Server Actions
+- Rate limiting on authentication endpoints
+- Security headers configured
+- Account lockout after failed login attempts
+- Role-based access control (RBAC)
+- IDOR protection on all resources
 
-## Getting Help
+See `Docs/SECURITY_COMPLETE.md` for detailed security documentation.
 
-- **Documentation**: Check `Docs/ADMIN_PANEL.md` for admin panel details
-- **Issues**: Open an issue on GitHub for bugs or feature requests
-- **Database Issues**: Use Prisma Studio to inspect data
-- **Logs**: Check application logs for error messages
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Copyright (c) 2025 VBS App Contributors
+## Support
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+For issues, questions, or contributions, please open an issue on the GitHub repository.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+## Roadmap
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-## Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## Changelog
-
-See [IMPROVEMENTS.md](./Docs/IMPROVEMENTS.md) for a detailed list of improvements and changes.
-
----
-
-Made with ❤️ for churches running VBS programs
+- [ ] Email notifications
+- [ ] Advanced reporting and analytics
+- [ ] Mobile app
+- [ ] Multi-language support
+- [ ] Integration with church management systems
