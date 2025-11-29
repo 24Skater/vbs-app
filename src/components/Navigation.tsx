@@ -8,8 +8,8 @@ export default function Navigation() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
 
-  // Don't show navigation on auth pages
-  if (pathname?.startsWith("/auth")) {
+  // Don't show navigation on auth pages or home page (home has its own nav)
+  if (pathname?.startsWith("/auth") || pathname === "/") {
     return null;
   }
 

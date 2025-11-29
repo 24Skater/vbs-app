@@ -125,11 +125,12 @@ async function deleteEvent(id: number) {
 }
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export default async function EditEventPage({ params }: Props) {
-  const id = Number(params.id);
+  const { id: idParam } = await params;
+  const id = Number(idParam);
   if (isNaN(id)) return notFound();
 
   const event = await prisma.event.findUnique({

@@ -21,6 +21,11 @@ async function setActiveEvent(eventId: number) {
 export default async function EventsPage() {
   const events = await prisma.event.findMany({
     orderBy: { year: "desc" },
+    include: {
+      _count: {
+        select: { students: true },
+      },
+    },
   });
 
   let activeEvent = null;
@@ -91,7 +96,7 @@ export default async function EventsPage() {
                     )}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    {event.students?.length || 0}
+                    {event._count.students}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">

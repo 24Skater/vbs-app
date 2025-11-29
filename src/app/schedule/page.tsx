@@ -1,80 +1,11 @@
-import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getActiveEvent } from "@/lib/event";
 import { requireRole } from "@/lib/auth";
 import { getCategories } from "@/lib/categories";
-import { scheduleSessionSchema } from "@/lib/validation";
 import { toDateTimeLocal } from "@/lib/date-utils";
-import { MAX_FUTURE_YEARS } from "@/lib/constants";
 import Link from "next/link";
 import CategorySelect from "@/components/CategorySelect";
-
-/* ─────────────── Server actions ─────────────── */
-export async function createSession(formData: FormData) {
-  "use server";
-  await requireRole("STAFF");
-
-  const event = await getActiveEvent();
-
-  const rawData = {
-    title: formData.get("title"),
-    start: formData.get("start"),
-    end: formData.get("end"),
-    location: formData.get("location"),
-    group: formData.get("group"),
-    notes: formData.get("notes"),
-    eventId: event.id,
-  };
-
-  const validation = scheduleSessionSchema.safeParse(rawData);
-  if (!validation.success) {
-    // Don't expose detailed validation errors to users
-    throw new Error("Invalid session data. Please check all fields.");
-  }
-
-  const data = validation.data;
-  if (data.end <= data.start) {
-    throw new Error("End time must be after start time.");
-  }
-
-  // Additional validation: ensure dates are reasonable
-  const now = new Date();
-  const maxFuture = new Date(now.getFullYear() + MAX_FUTURE_YEARS, 11, 31);
-  if (data.start > maxFuture || data.end > maxFuture) {
-    throw new Error(`Session dates cannot be more than ${MAX_FUTURE_YEARS} years in the future.`);
-  }
-
-  await prisma.scheduleSession.create({
-    data: {
-      title: data.title,
-      start: data.start,
-      end: data.end,
-      location: data.location ?? null,
-      group: data.group ?? null,
-      notes: data.notes ?? null,
-      eventId: data.eventId,
-    },
-  });
-
-  revalidatePath("/schedule");
-}
-
-export async function deleteSession(formData: FormData) {
-  "use server";
-  const { verifySessionAccess } = await import("@/lib/resource-access");
-  const { validateId } = await import("@/lib/resource-access");
-
-  await requireRole("STAFF");
-
-  const idInput = formData.get("id");
-
-  // Validate and verify access (IDOR protection)
-  const id = validateId(idInput, "Session");
-  await verifySessionAccess(id);
-
-  await prisma.scheduleSession.delete({ where: { id } });
-  revalidatePath("/schedule");
-}
+import { createSession, deleteSession } from "./actions";
 
 /* ───────────────── Page ───────────────── */
 

@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     error?: string;
-  };
+  }>;
 };
 
 const errorMessages: Record<string, string> = {
@@ -13,8 +13,9 @@ const errorMessages: Record<string, string> = {
   Default: "An error occurred during authentication.",
 };
 
-export default function AuthErrorPage({ searchParams }: Props) {
-  const error = searchParams.error || "Default";
+export default async function AuthErrorPage({ searchParams }: Props) {
+  const resolvedSearchParams = await searchParams;
+  const error = resolvedSearchParams.error || "Default";
   const message = errorMessages[error] || errorMessages.Default;
 
   return (

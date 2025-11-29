@@ -1,86 +1,58 @@
 /**
- * Next.js middleware for authentication, authorization, and security headers
+ * Next.js middleware for security headers and basic route protection
+ * 
+ * Note: Middleware runs in Edge runtime, so we can't use Node.js modules like Prisma.
+ * Authentication and authorization are handled in page components using requireAuth/requireRole.
+ * This middleware only handles security headers and basic route structure.
  */
-import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { addSecurityHeaders } from "@/lib/security-headers";
 import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limit";
+import { RATE_LIMIT_WINDOW_MS, RATE_LIMIT_MAX_REQUESTS } from "@/lib/constants";
 
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-    const path = req.nextUrl.pathname;
+export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
 
-    // Apply security headers to all responses
-    let response = NextResponse.next();
-    response = addSecurityHeaders(response);
+  // Apply security headers to all responses
+  let response = NextResponse.next();
+  response = addSecurityHeaders(response);
 
-    // Rate limiting for authentication endpoints
-    if (path.startsWith("/api/auth/signin") || path.startsWith("/api/auth/callback")) {
-      const { RATE_LIMIT_WINDOW_MS, RATE_LIMIT_MAX_REQUESTS } = await import("@/lib/constants");
-      const identifier = getClientIdentifier(req);
-      const rateLimit = checkRateLimit(identifier, {
-        windowMs: RATE_LIMIT_WINDOW_MS,
-        maxRequests: RATE_LIMIT_MAX_REQUESTS,
-      });
+  // Rate limiting for authentication endpoints
+  if (path.startsWith("/api/auth/signin") || path.startsWith("/api/auth/callback")) {
+    const identifier = getClientIdentifier(request);
+    const rateLimit = checkRateLimit(identifier, {
+      windowMs: RATE_LIMIT_WINDOW_MS,
+      maxRequests: RATE_LIMIT_MAX_REQUESTS,
+    });
 
-      if (!rateLimit.success) {
-        return new NextResponse(
-          JSON.stringify({
-            error: "Too many requests. Please try again later.",
-            retryAfter: rateLimit.retryAfter,
-          }),
-          {
-            status: 429,
-            headers: {
-              "Content-Type": "application/json",
-              "Retry-After": String(rateLimit.retryAfter),
-              ...Object.fromEntries(response.headers.entries()),
-            },
-          }
-        );
-      }
-
-      // Add rate limit headers
-      response.headers.set("X-RateLimit-Limit", String(RATE_LIMIT_MAX_REQUESTS));
-      response.headers.set("X-RateLimit-Remaining", String(rateLimit.remaining));
-      response.headers.set("X-RateLimit-Reset", String(rateLimit.resetAt));
-    }
-
-    // Admin-only routes
-    if (path.startsWith("/admin") && token?.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
-    }
-
-    // Staff-only routes (staff and admin can access)
-    const staffRoutes = ["/students", "/checkin", "/attendance", "/schedule"];
-    if (
-      staffRoutes.some((route) => path.startsWith(route)) &&
-      token?.role !== "ADMIN" &&
-      token?.role !== "STAFF"
-    ) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
-    }
-
-    return response;
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        const path = req.nextUrl.pathname;
-
-        // Public routes
-        const publicRoutes = ["/", "/auth"];
-        if (publicRoutes.some((route) => path.startsWith(route))) {
-          return true;
+    if (!rateLimit.success) {
+      return new NextResponse(
+        JSON.stringify({
+          error: "Too many requests. Please try again later.",
+          retryAfter: rateLimit.retryAfter,
+        }),
+        {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "Retry-After": String(rateLimit.retryAfter),
+            ...Object.fromEntries(response.headers.entries()),
+          },
         }
+      );
+    }
 
-        // All other routes require authentication
-        return !!token;
-      },
-    },
+    // Add rate limit headers
+    response.headers.set("X-RateLimit-Limit", String(RATE_LIMIT_MAX_REQUESTS));
+    response.headers.set("X-RateLimit-Remaining", String(rateLimit.remaining));
+    response.headers.set("X-RateLimit-Reset", String(rateLimit.resetAt));
   }
-);
+
+  // All authentication and authorization is handled in page components
+  // This middleware only provides security headers and rate limiting
+  return response;
+}
 
 export const config = {
   matcher: [

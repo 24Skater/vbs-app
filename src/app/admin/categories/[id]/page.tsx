@@ -122,11 +122,12 @@ async function deleteCategoryAction(id: number) {
 }
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export default async function EditCategoryPage({ params }: Props) {
-  const id = Number(params.id);
+  const { id: idParam } = await params;
+  const id = Number(idParam);
   if (isNaN(id)) return notFound();
 
   const category = await getCategoryById(id);

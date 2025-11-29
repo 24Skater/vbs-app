@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getActiveEvent } from "@/lib/event";
@@ -7,41 +6,7 @@ import { requireRole } from "@/lib/auth";
 import { getCategories } from "@/lib/categories";
 import { getDayRange } from "@/lib/date-utils";
 import AttendanceControls from "../../components/AttendanceControls";
-
-/* ---------- Server Action: Undo (delete one attendance row) ---------- */
-export async function undoAttendance(formData: FormData) {
-  "use server";
-  await requireRole("STAFF");
-
-  const idInput = formData.get("id");
-  const id = idInput ? Number(idInput) : null;
-  const date = String(formData.get("date") ?? "");
-
-  // Validate input
-  if (!id || !Number.isInteger(id) || id <= 0) {
-    throw new Error("Invalid attendance ID");
-  }
-
-  // Verify attendance exists and belongs to active event (IDOR protection)
-  const event = await getActiveEvent();
-  const attendance = await prisma.attendance.findUnique({
-    where: { id },
-    select: { id: true, eventId: true },
-  });
-
-  if (!attendance) {
-    throw new Error("Attendance record not found");
-  }
-
-  if (attendance.eventId !== event.id) {
-    throw new Error("Attendance record does not belong to the active event");
-  }
-
-  await prisma.attendance.delete({ where: { id } });
-
-  // revalidate the filtered page the user is on
-  revalidatePath(`/attendance${date ? `?date=${date}` : ""}`);
-}
+import { undoAttendance } from "./actions";
 
 /* ------------------------------ Helpers ------------------------------ */
 function rangeForDate(iso?: string) {
@@ -53,18 +18,19 @@ function rangeForDate(iso?: string) {
 }
 
 type PageProps = {
-  searchParams: {
+  searchParams: Promise<{
     date?: string; // yyyy-mm-dd
     q?: string;
     category?: string;
-  };
+  }>;
 };
 
 export default async function AttendancePage({ searchParams }: PageProps) {
   await requireRole("STAFF");
 
-  const { date, q } = searchParams;
-  const category = (searchParams.category ?? "").trim() || undefined;
+  const resolvedSearchParams = await searchParams;
+  const { date, q } = resolvedSearchParams;
+  const category = (resolvedSearchParams.category ?? "").trim() || undefined;
 
   let event;
   try {
@@ -171,7 +137,7 @@ export default async function AttendancePage({ searchParams }: PageProps) {
                 <td className="px-4 py-2 text-right">
                   <form action={undoAttendance}>
                     <input type="hidden" name="id" value={r.id} />
-                    <input type="hidden" name="date" value={searchParams.date ?? ""} />
+                    <input type="hidden" name="date" value={resolvedSearchParams.date ?? ""} />
                     <button
                       type="submit"
                       className="rounded-md bg-amber-600 px-3 py-1.5 text-white hover:bg-amber-700"

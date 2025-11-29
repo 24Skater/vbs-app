@@ -1,87 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { escapeHtml } from "@/lib/xss-protection";
-
-/* ───────────────────── Server actions ───────────────────── */
-
-export async function checkInAction(studentId: number) {
-  "use server";
-  const { requireRole } = await import("@/lib/auth");
-  const { getActiveEvent } = await import("@/lib/event");
-  const { verifyStudentAccess } = await import("@/lib/resource-access");
-  const { validateId } = await import("@/lib/resource-access");
-  const { getTodayRange } = await import("@/lib/date-utils");
-  
-  await requireRole("STAFF");
-  
-  // Validate studentId
-  const validId = validateId(studentId, "Student");
-
-  // Verify student access (IDOR protection)
-  await verifyStudentAccess(validId);
-
-  const event = await getActiveEvent();
-
-  // Check if already checked in today (idempotent)
-  const { start, end } = getTodayRange();
-
-  const existing = await prisma.attendance.findFirst({
-    where: {
-      studentId: validId,
-      eventId: event.id,
-      date: { gte: start, lt: end },
-    },
-  });
-
-  if (!existing) {
-    await prisma.attendance.create({
-      data: { studentId: validId, eventId: event.id },
-    });
-  }
-
-  revalidatePath(`/students/${validId}`);
-}
-
-export async function togglePaidAction(studentId: number) {
-  "use server";
-  const { requireRole } = await import("@/lib/auth");
-  const { getActiveEvent } = await import("@/lib/event");
-  const { verifyStudentAccess } = await import("@/lib/resource-access");
-  const { validateId } = await import("@/lib/resource-access");
-  
-  await requireRole("STAFF");
-  
-  // Validate studentId
-  const validId = validateId(studentId, "Student");
-
-  // Verify student access (IDOR protection)
-  await verifyStudentAccess(validId);
-
-  const event = await getActiveEvent();
-
-  const existing = await prisma.payment.findFirst({
-    where: { studentId: validId, eventId: event.id },
-  });
-
-  if (existing) {
-    await prisma.payment.delete({ where: { id: existing.id } });
-  } else {
-    await prisma.payment.create({
-      data: { studentId: validId, eventId: event.id, amount: 0 },
-    });
-  }
-
-  revalidatePath(`/students/${validId}`);
-}
+import { checkInAction, togglePaidAction } from "./actions";
 
 /* ────────────────────────── Page ────────────────────────── */
 
-type Props = { params: { id: string } };
+type Props = { params: Promise<{ id: string }> };
 
 export default async function StudentProfile({ params }: Props) {
-  const id = Number(params.id);
+  const { id: idParam } = await params;
+  const id = Number(idParam);
   if (Number.isNaN(id)) return notFound();
 
   const student = await prisma.student.findUnique({

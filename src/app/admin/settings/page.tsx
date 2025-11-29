@@ -63,8 +63,9 @@ async function updateSettingsAction(formData: FormData) {
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: { success?: string };
+  searchParams: Promise<{ success?: string }>;
 }) {
+  const resolvedSearchParams = await searchParams;
   const settings = await getSettings();
 
   return (
@@ -76,7 +77,7 @@ export default async function SettingsPage({
         </p>
       </div>
 
-      {searchParams.success && (
+      {resolvedSearchParams.success && (
         <div className="rounded-md bg-green-50 p-4">
           <p className="text-sm text-green-800">Settings saved successfully!</p>
         </div>

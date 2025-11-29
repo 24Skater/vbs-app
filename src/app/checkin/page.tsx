@@ -1,4 +1,3 @@
-import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getActiveEvent } from "@/lib/event";
 import { requireRole } from "@/lib/auth";
@@ -6,55 +5,19 @@ import { getCategories } from "@/lib/categories";
 import { getTodayRange } from "@/lib/date-utils";
 import CheckinControls from "@/components/CheckinControls";
 import { escapeHtml } from "@/lib/xss-protection";
-
-/* ── Server Action: check a student in for TODAY ───────────────────────── */
-export async function checkInById(studentId: number) {
-  "use server";
-  const { verifyStudentAccess } = await import("@/lib/resource-access");
-  const { validateId } = await import("@/lib/resource-access");
-  const { getTodayRange } = await import("@/lib/date-utils");
-
-  await requireRole("STAFF");
-
-  // Validate studentId
-  const validId = validateId(studentId, "Student");
-
-  // Verify student access (IDOR protection)
-  await verifyStudentAccess(validId);
-
-  const event = await getActiveEvent();
-
-  const { start, end } = getTodayRange();
-
-  // idempotent: if already checked in today, do nothing
-  const already = await prisma.attendance.findFirst({
-    where: {
-      studentId: validId,
-      eventId: event.id,
-      date: { gte: start, lt: end },
-    },
-    select: { id: true },
-  });
-
-  if (!already) {
-    await prisma.attendance.create({
-      data: { studentId: validId, eventId: event.id },
-    });
-  }
-
-  revalidatePath("/checkin");
-}
+import { checkInById } from "./actions";
 
 type PageProps = {
-  searchParams: {
+  searchParams: Promise<{
     q?: string;
     category?: string;
-  };
+  }>;
 };
 
 export default async function CheckInPage({ searchParams }: PageProps) {
-  const q = (searchParams.q ?? "").trim();
-  const category = (searchParams.category ?? "").trim() || undefined;
+  const resolvedSearchParams = await searchParams;
+  const q = (resolvedSearchParams.q ?? "").trim();
+  const category = (resolvedSearchParams.category ?? "").trim() || undefined;
 
   await requireRole("STAFF");
 

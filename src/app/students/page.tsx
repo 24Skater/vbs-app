@@ -8,20 +8,21 @@ import { parsePagination, getSkip, calculatePagination } from "@/lib/pagination"
 import { escapeHtml } from "@/lib/xss-protection";
 
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     q?: string;
     category?: string;
     size?: string;
     page?: string;
     pageSize?: string;
-  };
+  }>;
 };
 
 export default async function StudentsPage({ searchParams }: Props) {
   await requireRole("STAFF");
 
-  const { q = "", category, size } = searchParams;
-  const { page, pageSize } = parsePagination(searchParams);
+  const resolvedSearchParams = await searchParams;
+  const { q = "", category, size } = resolvedSearchParams;
+  const { page, pageSize } = parsePagination(resolvedSearchParams);
 
   let event;
   try {
@@ -130,7 +131,7 @@ export default async function StudentsPage({ searchParams }: Props) {
             {pagination.hasPrev && (
               <Link
                 href={`/students?${new URLSearchParams({
-                  ...searchParams,
+                  ...resolvedSearchParams,
                   page: String(pagination.page - 1),
                 }).toString()}`}
                 className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -141,7 +142,7 @@ export default async function StudentsPage({ searchParams }: Props) {
             {pagination.hasNext && (
               <Link
                 href={`/students?${new URLSearchParams({
-                  ...searchParams,
+                  ...resolvedSearchParams,
                   page: String(pagination.page + 1),
                 }).toString()}`}
                 className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -165,7 +166,7 @@ export default async function StudentsPage({ searchParams }: Props) {
                 {pagination.hasPrev && (
                   <Link
                     href={`/students?${new URLSearchParams({
-                      ...searchParams,
+                      ...resolvedSearchParams,
                       page: String(pagination.page - 1),
                     }).toString()}`}
                     className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
@@ -188,7 +189,7 @@ export default async function StudentsPage({ searchParams }: Props) {
                     <Link
                       key={pageNum}
                       href={`/students?${new URLSearchParams({
-                        ...searchParams,
+                        ...resolvedSearchParams,
                         page: String(pageNum),
                       }).toString()}`}
                       className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
@@ -204,7 +205,7 @@ export default async function StudentsPage({ searchParams }: Props) {
                 {pagination.hasNext && (
                   <Link
                     href={`/students?${new URLSearchParams({
-                      ...searchParams,
+                      ...resolvedSearchParams,
                       page: String(pagination.page + 1),
                     }).toString()}`}
                     className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
@@ -217,8 +218,6 @@ export default async function StudentsPage({ searchParams }: Props) {
           </div>
         </div>
       )}
-        </table>
-      </div>
     </div>
   );
 }
