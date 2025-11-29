@@ -2,16 +2,40 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getActiveEvent } from "@/lib/event";
+import { requireRole } from "@/lib/auth";
+import { getCategories } from "@/lib/categories";
+import { attendanceDeleteSchema } from "@/lib/validation";
 import AttendanceControls from "../../components/AttendanceControls";
-
-const EVENT_YEAR = 2024;
 
 /* ---------- Server Action: Undo (delete one attendance row) ---------- */
 export async function undoAttendance(formData: FormData) {
   "use server";
-  const id = Number(formData.get("id"));
+  await requireRole("STAFF");
+
+  const idInput = formData.get("id");
+  const id = idInput ? Number(idInput) : null;
   const date = String(formData.get("date") ?? "");
-  if (!id) return;
+
+  // Validate input
+  if (!id || !Number.isInteger(id) || id <= 0) {
+    throw new Error("Invalid attendance ID");
+  }
+
+  // Verify attendance exists and belongs to active event (IDOR protection)
+  const event = await getActiveEvent();
+  const attendance = await prisma.attendance.findUnique({
+    where: { id },
+    select: { id: true, eventId: true },
+  });
+
+  if (!attendance) {
+    throw new Error("Attendance record not found");
+  }
+
+  if (attendance.eventId !== event.id) {
+    throw new Error("Attendance record does not belong to the active event");
+  }
 
   await prisma.attendance.delete({ where: { id } });
 
@@ -37,16 +61,31 @@ type PageProps = {
 };
 
 export default async function AttendancePage({ searchParams }: PageProps) {
+  await requireRole("STAFF");
+
   const { date, q } = searchParams;
   const category = (searchParams.category ?? "").trim() || undefined;
 
-  const event = await prisma.event.findUnique({
-    where: { year: EVENT_YEAR },
-    select: { id: true, year: true },
-  });
-  if (!event) return notFound();
+  let event;
+  try {
+    event = await getActiveEvent();
+  } catch (error) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold text-gray-900">Attendance</h1>
+        <div className="rounded-md bg-red-50 p-4">
+          <p className="text-sm text-red-800">
+            {error instanceof Error
+              ? error.message
+              : "No active event found. Please activate an event in the admin panel."}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const { start, end } = rangeForDate(date);
+  const categories = await getCategories(event.id);
 
   // Pull today's attendance (filtered)
   const records = await prisma.attendance.findMany({
@@ -82,7 +121,7 @@ export default async function AttendancePage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Attendance</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Attendance</h1>
         <Link
           href={exportHref}
           className="rounded-md bg-gray-100 px-3 py-1.5 text-sm hover:bg-gray-200"
@@ -91,14 +130,14 @@ export default async function AttendancePage({ searchParams }: PageProps) {
         </Link>
       </div>
 
-      <AttendanceControls />
+      <AttendanceControls categories={categories} />
 
       {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat title="Present" value={String(total)} />
-        <Stat title="Youth" value={String(byCat["Youth"] ?? 0)} />
-        <Stat title="Jóvenes" value={String(byCat["Jovenes"] ?? 0)} />
-        <Stat title="Teachers/Assistants" value={String(byCat["Teacher/Assistant"] ?? 0)} />
+        {categories.map((cat) => (
+          <Stat key={cat.name} title={cat.name} value={String(byCat[cat.name] ?? 0)} />
+        ))}
       </div>
 
       {/* Table */}

@@ -1,24 +1,35 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getActiveEvent } from "@/lib/event";
+import { requireRole } from "@/lib/auth";
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const year = Number(searchParams.get("year") ?? "2024");
-  const event = await prisma.event.findUnique({ where: { year }, select: { id: true, year: true, theme: true } });
-  if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
+  try {
+    await requireRole("STAFF");
 
-  const sessions = await prisma.session.findMany({
-    where: { eventId: event.id },
-    orderBy: { start: "asc" },
-  });
+    const event = await getActiveEvent();
 
-  const ics = buildICS(sessions, event.theme ?? `VBS ${event.year}`);
-  return new NextResponse(ics, {
-    headers: {
-      "Content-Type": "text/calendar; charset=utf-8",
-      "Content-Disposition": `attachment; filename="vbs_${event.year}_schedule.ics"`,
-    },
-  });
+    const sessions = await prisma.scheduleSession.findMany({
+      where: { eventId: event.id },
+      orderBy: { start: "asc" },
+    });
+
+    const ics = buildICS(sessions, event.theme ?? `VBS ${event.year}`);
+    return new NextResponse(ics, {
+      headers: {
+        "Content-Type": "text/calendar; charset=utf-8",
+        "Content-Disposition": `attachment; filename="vbs_${event.year}_schedule.ics"`,
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to export schedule",
+      },
+      { status: error instanceof Error && "statusCode" in error ? (error as any).statusCode : 500 }
+    );
+  }
 }
 
 function dtstamp(d: Date | string) {

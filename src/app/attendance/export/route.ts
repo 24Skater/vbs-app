@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-const EVENT_YEAR = 2024;
+import { getActiveEvent } from "@/lib/event";
+import { requireRole } from "@/lib/auth";
 
 function rangeForDate(iso?: string) {
   const base = iso ? new Date(iso) : new Date();
@@ -11,18 +11,15 @@ function rangeForDate(iso?: string) {
 }
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const date = searchParams.get("date") ?? undefined;
-  const q = searchParams.get("q") ?? undefined;
-  const category = searchParams.get("category") ?? undefined;
+  try {
+    await requireRole("STAFF");
 
-  const event = await prisma.event.findUnique({
-    where: { year: EVENT_YEAR },
-    select: { id: true, year: true },
-  });
-  if (!event) {
-    return NextResponse.json({ error: "Event not found" }, { status: 404 });
-  }
+    const { searchParams } = new URL(req.url);
+    const date = searchParams.get("date") ?? undefined;
+    const q = searchParams.get("q") ?? undefined;
+    const category = searchParams.get("category") ?? undefined;
+
+    const event = await getActiveEvent();
 
   const { start, end } = rangeForDate(date ?? undefined);
 
@@ -51,13 +48,22 @@ export async function GET(req: Request) {
     ]),
   ];
 
-  const csv = rows.map((r) => r.map(escape).join(",")).join("\n");
-  return new NextResponse(csv, {
-    headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="attendance_${date ?? "today"}.csv"`,
-    },
-  });
+    const csv = rows.map((r) => r.map(escape).join(",")).join("\n");
+    return new NextResponse(csv, {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="attendance_${date ?? "today"}.csv"`,
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to export attendance",
+      },
+      { status: error instanceof Error && "statusCode" in error ? (error as any).statusCode : 500 }
+    );
+  }
 }
 
 function escape(s: string) {

@@ -5,9 +5,10 @@ import { useTransition } from "react";
 
 type Props = {
   sizes: string[]; // unique sizes to populate the dropdown
+  categories: Array<{ name: string }>; // dynamic categories
 };
 
-export default function StudentsFilters({ sizes }: Props) {
+export default function StudentsFilters({ sizes, categories }: Props) {
   const router = useRouter();
   const sp = useSearchParams();
   const [pending, start] = useTransition();
@@ -45,9 +46,11 @@ export default function StudentsFilters({ sizes }: Props) {
           onChange={(e) => update({ category: e.target.value })}
         >
           <option value="">All</option>
-          <option value="Youth">Youth</option>
-          <option value="Jovenes">Jóvenes</option>
-          <option value="Teacher/Assistant">Teachers/Assistants</option>
+          {categories.map((cat) => (
+            <option key={cat.name} value={cat.name}>
+              {cat.name}
+            </option>
+          ))}
         </select>
       </div>
 

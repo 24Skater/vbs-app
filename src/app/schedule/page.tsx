@@ -1,29 +1,57 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getActiveEvent } from "@/lib/event";
+import { requireRole } from "@/lib/auth";
+import { getCategories } from "@/lib/categories";
+import { scheduleSessionSchema } from "@/lib/validation";
 import Link from "next/link";
-
-const EVENT_YEAR = 2024;
+import CategorySelect from "@/components/CategorySelect";
 
 /* ─────────────── Server actions ─────────────── */
 export async function createSession(formData: FormData) {
   "use server";
-  const event = await prisma.event.findUnique({ where: { year: EVENT_YEAR } });
-  if (!event) throw new Error(`Event ${EVENT_YEAR} not found`);
+  await requireRole("STAFF");
 
-  const title = String(formData.get("title") ?? "").trim();
-  const start = new Date(String(formData.get("start")));
-  const end = new Date(String(formData.get("end")));
-  const location = String(formData.get("location") ?? "").trim() || null;
-  const group = String(formData.get("group") ?? "").trim() || null;
-  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const event = await getActiveEvent();
 
-  if (!title || isNaN(start.getTime()) || isNaN(end.getTime())) {
-    throw new Error("Title, start, and end are required.");
+  const rawData = {
+    title: formData.get("title"),
+    start: formData.get("start"),
+    end: formData.get("end"),
+    location: formData.get("location"),
+    group: formData.get("group"),
+    notes: formData.get("notes"),
+    eventId: event.id,
+  };
+
+  const validation = scheduleSessionSchema.safeParse(rawData);
+  if (!validation.success) {
+    // Don't expose detailed validation errors to users
+    throw new Error("Invalid session data. Please check all fields.");
   }
-  if (end <= start) throw new Error("End time must be after start time.");
 
-  await prisma.session.create({
-    data: { title, start, end, location, group, notes, eventId: event.id },
+  const data = validation.data;
+  if (data.end <= data.start) {
+    throw new Error("End time must be after start time.");
+  }
+
+  // Additional validation: ensure dates are reasonable
+  const now = new Date();
+  const maxFuture = new Date(now.getFullYear() + 10, 11, 31);
+  if (data.start > maxFuture || data.end > maxFuture) {
+    throw new Error("Session dates cannot be more than 10 years in the future.");
+  }
+
+  await prisma.scheduleSession.create({
+    data: {
+      title: data.title,
+      start: data.start,
+      end: data.end,
+      location: data.location ?? null,
+      group: data.group ?? null,
+      notes: data.notes ?? null,
+      eventId: data.eventId,
+    },
   });
 
   revalidatePath("/schedule");
@@ -31,9 +59,31 @@ export async function createSession(formData: FormData) {
 
 export async function deleteSession(formData: FormData) {
   "use server";
-  const id = Number(formData.get("id"));
-  if (!id) throw new Error("Missing id");
-  await prisma.session.delete({ where: { id } });
+  await requireRole("STAFF");
+
+  const idInput = formData.get("id");
+  const id = idInput ? Number(idInput) : null;
+
+  if (!id || !Number.isInteger(id) || id <= 0) {
+    throw new Error("Invalid session ID");
+  }
+
+  // Verify session exists and belongs to active event (IDOR protection)
+  const event = await getActiveEvent();
+  const session = await prisma.scheduleSession.findUnique({
+    where: { id },
+    select: { id: true, eventId: true },
+  });
+
+  if (!session) {
+    throw new Error("Session not found");
+  }
+
+  if (session.eventId !== event.id) {
+    throw new Error("Session does not belong to the active event");
+  }
+
+  await prisma.scheduleSession.delete({ where: { id } });
   revalidatePath("/schedule");
 }
 
@@ -44,29 +94,35 @@ function toLocal(dt: Date | string) {
 }
 
 export default async function SchedulePage() {
-  const event = await prisma.event.findUnique({
-    where: { year: EVENT_YEAR },
-    select: { id: true, year: true, theme: true },
-  });
+  await requireRole("STAFF");
 
-  if (!event) {
+  let event;
+  try {
+    event = await getActiveEvent();
+  } catch (error) {
     return (
-      <div>
-        <h1 className="text-2xl font-bold">Schedule</h1>
-        <p>No event for {EVENT_YEAR}. Seed or create the event first.</p>
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold text-gray-900">Schedule</h1>
+        <div className="rounded-md bg-red-50 p-4">
+          <p className="text-sm text-red-800">
+            {error instanceof Error
+              ? error.message
+              : "No active event found. Please activate an event in the admin panel."}
+          </p>
+        </div>
       </div>
     );
   }
 
-  const sessions = await prisma.session.findMany({
+  const sessions = await prisma.scheduleSession.findMany({
     where: { eventId: event.id },
     orderBy: { start: "asc" },
   });
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Schedule</h1>
-      <p className="text-gray-600">
+      <h1 className="text-3xl font-bold text-gray-900">Schedule</h1>
+      <p className="text-sm text-gray-600">
         Event {event.year} {event.theme ? `• ${event.theme}` : ""}
       </p>
 
@@ -86,12 +142,7 @@ export default async function SchedulePage() {
           <input name="start" type="datetime-local" required className="rounded-md border px-3 py-2" />
           <input name="end" type="datetime-local" required className="rounded-md border px-3 py-2" />
           <input name="location" placeholder="Location" className="rounded-md border px-3 py-2" />
-          <select name="group" className="rounded-md border px-3 py-2">
-            <option value="">All</option>
-            <option value="Youth">Youth</option>
-            <option value="Jovenes">Jóvenes</option>
-            <option value="Teacher/Assistant">Teachers/Assistants</option>
-          </select>
+          <CategorySelect />
           <textarea
             name="notes"
             rows={2}
@@ -121,7 +172,7 @@ export default async function SchedulePage() {
             </tr>
           </thead>
           <tbody>
-            {sessions.map((s) => (
+            {sessions.map((s: { id: number; title: string; start: Date; end: Date; location: string | null; group: string | null; notes: string | null }) => (
               <tr key={s.id} className="border-t text-sm">
                 <td className="px-4 py-2">{s.title}</td>
                 <td className="px-4 py-2">

@@ -1,15 +1,37 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getActiveEvent } from "@/lib/event";
+import { requireRole } from "@/lib/auth";
+import { getCategories } from "@/lib/categories";
 import CheckinControls from "@/components/CheckinControls";
-
-const EVENT_YEAR = 2024; // TODO: make this configurable later
+import { escapeHtml } from "@/lib/xss-protection";
 
 /* ── Server Action: check a student in for TODAY ───────────────────────── */
 export async function checkInById(studentId: number) {
   "use server";
 
-  const event = await prisma.event.findUnique({ where: { year: EVENT_YEAR } });
-  if (!event) throw new Error(`Event ${EVENT_YEAR} not found`);
+  await requireRole("STAFF");
+
+  // Validate studentId
+  if (!studentId || !Number.isInteger(studentId) || studentId <= 0) {
+    throw new Error("Invalid student ID");
+  }
+
+  const event = await getActiveEvent();
+
+  // Verify student exists and belongs to active event (IDOR protection)
+  const student = await prisma.student.findUnique({
+    where: { id: studentId },
+    select: { id: true, eventId: true },
+  });
+
+  if (!student) {
+    throw new Error("Student not found");
+  }
+
+  if (student.eventId !== event.id) {
+    throw new Error("Student does not belong to the active event");
+  }
 
   const { start, end } = todayRange();
 
@@ -51,20 +73,28 @@ export default async function CheckInPage({ searchParams }: PageProps) {
   const q = (searchParams.q ?? "").trim();
   const category = (searchParams.category ?? "").trim() || undefined;
 
-  const event = await prisma.event.findUnique({ where: { year: EVENT_YEAR } });
-  if (!event) {
+  await requireRole("STAFF");
+
+  let event;
+  try {
+    event = await getActiveEvent();
+  } catch (error) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold">Check-In</h1>
-        <p className="text-red-600">
-          No event for {EVENT_YEAR}. Create it (or run the seed) before using
-          Check-In.
-        </p>
+        <h1 className="text-3xl font-bold text-gray-900">Check-In</h1>
+        <div className="rounded-md bg-red-50 p-4">
+          <p className="text-sm text-red-800">
+            {error instanceof Error
+              ? error.message
+              : "No active event found. Please activate an event in the admin panel."}
+          </p>
+        </div>
       </div>
     );
   }
 
   const { start, end } = todayRange();
+  const categories = await getCategories(event.id);
 
   // Load students + whether they have an attendance entry today
   const students = await prisma.student.findMany({
@@ -89,7 +119,7 @@ export default async function CheckInPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Check-In</h1>
 
-      <CheckinControls />
+      <CheckinControls categories={categories} />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {students.map((s) => {
@@ -105,9 +135,9 @@ export default async function CheckInPage({ searchParams }: PageProps) {
               }`}
             >
               <div>
-                <div className="text-lg font-semibold">{s.name}</div>
+                <div className="text-lg font-semibold">{escapeHtml(s.name)}</div>
                 <div className="text-sm text-gray-600">
-                  {s.category} • {s.size}
+                  {escapeHtml(s.category)} • {escapeHtml(s.size)}
                 </div>
               </div>
 

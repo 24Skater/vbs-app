@@ -2,25 +2,89 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { escapeHtml } from "@/lib/xss-protection";
 
 /* ───────────────────── Server actions ───────────────────── */
 
 export async function checkInAction(studentId: number) {
   "use server";
-  const event = await prisma.event.findUnique({ where: { year: 2024 } });
-  if (!event) throw new Error("Event 2024 not found");
+  const { requireRole } = await import("@/lib/auth");
+  const { getActiveEvent } = await import("@/lib/event");
+  const { ValidationError } = await import("@/lib/errors");
+  
+  await requireRole("STAFF");
+  
+  // Validate studentId
+  if (!studentId || !Number.isInteger(studentId) || studentId <= 0) {
+    throw new ValidationError("Invalid student ID");
+  }
 
-  await prisma.attendance.create({
-    data: { studentId, eventId: event.id }, // date defaults to now()
+  const event = await getActiveEvent();
+
+  // Verify student exists and belongs to active event (IDOR protection)
+  const student = await prisma.student.findUnique({
+    where: { id: studentId },
+    select: { id: true, eventId: true },
   });
+
+  if (!student) {
+    throw new ValidationError("Student not found");
+  }
+
+  if (student.eventId !== event.id) {
+    throw new ValidationError("Student does not belong to the active event");
+  }
+
+  // Check if already checked in today (idempotent)
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+
+  const existing = await prisma.attendance.findFirst({
+    where: {
+      studentId,
+      eventId: event.id,
+      date: { gte: start, lt: end },
+    },
+  });
+
+  if (!existing) {
+    await prisma.attendance.create({
+      data: { studentId, eventId: event.id },
+    });
+  }
 
   revalidatePath(`/students/${studentId}`);
 }
 
 export async function togglePaidAction(studentId: number) {
   "use server";
-  const event = await prisma.event.findUnique({ where: { year: 2024 } });
-  if (!event) throw new Error("Event 2024 not found");
+  const { requireRole } = await import("@/lib/auth");
+  const { getActiveEvent } = await import("@/lib/event");
+  const { ValidationError } = await import("@/lib/errors");
+  
+  await requireRole("STAFF");
+  
+  // Validate studentId
+  if (!studentId || !Number.isInteger(studentId) || studentId <= 0) {
+    throw new ValidationError("Invalid student ID");
+  }
+
+  const event = await getActiveEvent();
+
+  // Verify student exists and belongs to active event (IDOR protection)
+  const student = await prisma.student.findUnique({
+    where: { id: studentId },
+    select: { id: true, eventId: true },
+  });
+
+  if (!student) {
+    throw new ValidationError("Student not found");
+  }
+
+  if (student.eventId !== event.id) {
+    throw new ValidationError("Student does not belong to the active event");
+  }
 
   const existing = await prisma.payment.findFirst({
     where: { studentId, eventId: event.id },
@@ -73,7 +137,7 @@ export default async function StudentProfile({ params }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{student.name}</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{escapeHtml(student.name)}</h1>
         <Link
           href="/students"
           className="rounded-md bg-gray-100 px-3 py-1.5 text-sm hover:bg-gray-200"
@@ -83,8 +147,8 @@ export default async function StudentProfile({ params }: Props) {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Info title="Category" value={student.category} />
-        <Info title="Shirt size" value={student.size} />
+        <Info title="Category" value={escapeHtml(student.category)} />
+        <Info title="Shirt size" value={escapeHtml(student.size)} />
         <Info title="Event" value={String(student.event?.year ?? "—")} />
         <Info
           title="Created"

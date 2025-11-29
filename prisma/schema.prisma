@@ -9,6 +9,93 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// --- Authentication ---
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(STAFF)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  VIEWER
+}
+
+// --- Configuration & Settings ---
+
+model AppSettings {
+  id          String   @id @default("singleton")
+  siteName    String   @default("VBS App")
+  primaryColor String  @default("#2563eb")
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model StudentCategory {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  color       String?
+  order       Int      @default(0)
+  eventId     Int?
+  event       Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  students    Student[]
+
+  @@unique([eventId, name])
+  @@index([eventId])
+}
+
 // --- Core Models ---
 
 model Event {
@@ -16,60 +103,75 @@ model Event {
   year      Int      @unique
   theme     String?
   isActive  Boolean  @default(false)
+  startDate DateTime?
+  endDate   DateTime?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  students    Student[]
-  attendances Attendance[]
-  payments    Payment[]
-  sessions    Session[]
+  students         Student[]
+  attendances      Attendance[]
+  payments         Payment[]
+  sessions         ScheduleSession[]
+  studentCategories StudentCategory[]
 }
 
 model Student {
   id        Int      @id @default(autoincrement())
   name      String
   size      String
-  category  String
-  event     Event    @relation(fields: [eventId], references: [id])
+  category  String   // Keep for backward compatibility
+  categoryId Int?
+  categoryRef StudentCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId   Int
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   attendances Attendance[]
   payments    Payment[]
-  // @@unique([eventId, name]) // optional
 
+  @@unique([eventId, name])
   @@index([eventId])
+  @@index([eventId, category])
+  @@index([categoryId])
 }
 
 // --- Attendance & Payment ---
 
 model Attendance {
   id        Int      @id @default(autoincrement())
-  student   Student  @relation(fields: [studentId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId Int
-  event     Event    @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId   Int
   date      DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  @@index([eventId, studentId, date])
+  @@unique([eventId, studentId, date])
+  @@index([eventId, date])
+  @@index([studentId])
 }
 
 model Payment {
   id        Int      @id @default(autoincrement())
-  student   Student  @relation(fields: [studentId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId Int
-  event     Event    @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId   Int
-  amount    Int      @default(0)
+  amount    Decimal  @default(0) @db.Decimal(10, 2)
   paidAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([eventId, studentId])
+  @@index([studentId])
 }
 
 // --- Schedule Sessions ---
 
-model Session {
+model ScheduleSession {
   id        Int      @id @default(autoincrement())
-  event     Event    @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId   Int
   title     String
   start     DateTime
@@ -81,4 +183,5 @@ model Session {
   updatedAt DateTime @updatedAt
 
   @@index([eventId, start])
+  @@index([eventId, end])
 }

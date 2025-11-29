@@ -3,7 +3,11 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
-export default function CheckinControls() {
+type Props = {
+  categories: Array<{ name: string }>;
+};
+
+export default function CheckinControls({ categories }: Props) {
   const router = useRouter();
   const sp = useSearchParams();
   const [pending, startTransition] = useTransition();
@@ -49,9 +53,11 @@ export default function CheckinControls() {
           onChange={(e) => update({ category: e.target.value })}
         >
           <option value="">All</option>
-          <option value="Youth">Youth</option>
-          <option value="Jovenes">Jóvenes</option>
-          <option value="Teacher/Assistant">Teachers/Assistants</option>
+          {categories.map((cat) => (
+            <option key={cat.name} value={cat.name}>
+              {cat.name}
+            </option>
+          ))}
         </select>
       </div>
 

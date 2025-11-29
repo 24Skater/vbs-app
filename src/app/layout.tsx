@@ -1,36 +1,29 @@
-import './globals.css';
-import Link from 'next/link';
-import type { Metadata } from 'next';
+import "./globals.css";
+import type { Metadata } from "next";
+import { SessionProvider } from "@/components/SessionProvider";
+import Navigation from "@/components/Navigation";
 
 export const metadata: Metadata = {
-  title: 'VBS App',
-  description: 'Vacation Bible School admin & check-in',
+  title: "VBS App",
+  description: "Vacation Bible School admin & check-in",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>
-        <header style={{ padding: '1rem', borderBottom: '1px solid #eee' }}>
-          <nav style={{ display: 'flex', gap: '1rem' }}>
-            <Link href="/">Home</Link>
-            <Link href="/dashboard">Staff Dashboard</Link>
-            <Link href="/students">Students</Link>
-            <Link href="/checkin">Check-In</Link>
-            <Link href="/attendance">Attendance</Link>
-            <Link href="/schedule">Schedule</Link>
-            <a
-              href="https://forms.google.com"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Registration Form
-            </a>
-          </nav>
-        </header>
-        <main style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem' }}>
-          {children}
-        </main>
+        <SessionProvider>
+          <Navigation />
+          <main className="min-h-screen bg-gray-50">
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+              {children}
+            </div>
+          </main>
+        </SessionProvider>
       </body>
     </html>
   );
