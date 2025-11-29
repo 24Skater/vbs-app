@@ -196,7 +196,7 @@ This document summarizes the security hardening measures implemented based on th
 3. ✅ **Resource Limits**: Implemented pagination and query result limits
 4. ✅ **Stronger Auth Policies**: Implemented account lockout and email verification tracking
 
-See `PHASE2_SECURITY_SUMMARY.md` for detailed implementation notes.
+See [PHASE2_SECURITY_SUMMARY.md](./PHASE2_SECURITY_SUMMARY.md) for detailed implementation notes.
 
 ### Low Priority
 1. **Security Monitoring**: Intrusion detection, anomaly detection

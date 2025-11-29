@@ -242,7 +242,7 @@ Access the admin panel at `/admin` (requires ADMIN role) to:
 - **Categories** - Create and customize student categories
 - **Settings** - Customize site name, colors, and branding
 
-See [ADMIN_PANEL.md](./ADMIN_PANEL.md) for detailed admin panel documentation.
+See [ADMIN_PANEL.md](./Docs/ADMIN_PANEL.md) for detailed admin panel documentation.
 
 ## Maintaining the Application
 
@@ -485,7 +485,7 @@ EMAIL_SERVER_SECURE="false"
 
 ## Getting Help
 
-- **Documentation**: Check `ADMIN_PANEL.md` for admin panel details
+- **Documentation**: Check `Docs/ADMIN_PANEL.md` for admin panel details
 - **Issues**: Open an issue on GitHub for bugs or feature requests
 - **Database Issues**: Use Prisma Studio to inspect data
 - **Logs**: Check application logs for error messages
@@ -525,7 +525,7 @@ Contributions are welcome! Please:
 
 ## Changelog
 
-See [IMPROVEMENTS.md](./IMPROVEMENTS.md) for a detailed list of improvements and changes.
+See [IMPROVEMENTS.md](./Docs/IMPROVEMENTS.md) for a detailed list of improvements and changes.
 
 ---
 

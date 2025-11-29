@@ -59,14 +59,14 @@ All critical, high-priority, and medium-priority security vulnerabilities have b
 ## 📁 Files Created
 
 ### Phase 1
-- `SECURITY_AUDIT.md` - Comprehensive security audit report
-- `SECURITY_HARDENING_SUMMARY.md` - Phase 1 implementation summary
+- [SECURITY_AUDIT.md](./SECURITY_AUDIT.md) - Comprehensive security audit report
+- [SECURITY_HARDENING_SUMMARY.md](./SECURITY_HARDENING_SUMMARY.md) - Phase 1 implementation summary
 - `src/lib/rate-limit.ts` - Rate limiting utilities
 - `src/lib/security-headers.ts` - Security headers configuration
 - `src/lib/audit-log.ts` - Audit logging system
 
 ### Phase 2
-- `PHASE2_SECURITY_SUMMARY.md` - Phase 2 implementation summary
+- [PHASE2_SECURITY_SUMMARY.md](./PHASE2_SECURITY_SUMMARY.md) - Phase 2 implementation summary
 - `src/lib/xss-protection.ts` - XSS protection utilities
 - `src/lib/pagination.ts` - Pagination utilities
 - `src/lib/auth-lockout.ts` - Account lockout system
@@ -162,9 +162,9 @@ Before deploying to production:
 
 ## 📚 Documentation
 
-- **Security Audit**: `SECURITY_AUDIT.md`
-- **Phase 1 Summary**: `SECURITY_HARDENING_SUMMARY.md`
-- **Phase 2 Summary**: `PHASE2_SECURITY_SUMMARY.md`
+- **Security Audit**: [SECURITY_AUDIT.md](./SECURITY_AUDIT.md)
+- **Phase 1 Summary**: [SECURITY_HARDENING_SUMMARY.md](./SECURITY_HARDENING_SUMMARY.md)
+- **Phase 2 Summary**: [PHASE2_SECURITY_SUMMARY.md](./PHASE2_SECURITY_SUMMARY.md)
 - **CSRF Protection**: `src/lib/csrf-protection.md`
 
 ---
