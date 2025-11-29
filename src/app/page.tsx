@@ -48,16 +48,16 @@ export default async function Home() {
             {session?.user ? (
               <Link
                 href="/dashboard"
-                className="rounded-md px-6 py-3 text-base font-semibold text-white shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                style={{ backgroundColor: settings.primaryColor }}
+                className="rounded-md px-6 py-3 text-base font-semibold shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                style={{ backgroundColor: settings.primaryColor, color: 'white' }}
               >
                 Dashboard
               </Link>
             ) : (
               <Link
                 href="/auth/signin"
-                className="rounded-md px-6 py-3 text-base font-semibold text-white shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                style={{ backgroundColor: settings.primaryColor }}
+                className="rounded-md px-6 py-3 text-base font-semibold shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                style={{ backgroundColor: settings.primaryColor, color: 'white' }}
               >
                 Sign In
               </Link>
@@ -115,16 +115,16 @@ export default async function Home() {
               {session?.user ? (
                 <Link
                   href="/dashboard"
-                  className="rounded-md px-6 py-3 text-base font-semibold text-white shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                  style={{ backgroundColor: settings.primaryColor }}
+                  className="rounded-md px-6 py-3 text-base font-semibold shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style={{ backgroundColor: settings.primaryColor, color: 'white' }}
                 >
                   Go to Dashboard
                 </Link>
               ) : (
                 <Link
                   href="/auth/signin"
-                  className="rounded-md px-6 py-3 text-base font-semibold text-white shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                  style={{ backgroundColor: settings.primaryColor }}
+                  className="rounded-md px-6 py-3 text-base font-semibold shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style={{ backgroundColor: settings.primaryColor, color: 'white' }}
                 >
                   Sign In
                 </Link>
@@ -259,8 +259,8 @@ export default async function Home() {
               <div className="mt-10">
                 <Link
                   href="/dashboard"
-                  className="rounded-md px-6 py-3 text-base font-semibold text-white shadow-sm hover:opacity-90"
-                  style={{ backgroundColor: settings.primaryColor }}
+                  className="rounded-md px-6 py-3 text-base font-semibold shadow-sm hover:opacity-90"
+                  style={{ backgroundColor: settings.primaryColor, color: 'white' }}
                 >
                   View Dashboard
                 </Link>
