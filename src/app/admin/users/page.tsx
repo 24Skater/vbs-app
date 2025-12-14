@@ -76,11 +76,19 @@ export default async function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Users</h2>
-        <p className="mt-1 text-sm text-gray-600">
-          Manage user accounts and roles. Users sign in via email magic link.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Users</h2>
+          <p className="mt-1 text-sm text-gray-600">
+            Manage user accounts and roles.
+          </p>
+        </div>
+        <Link
+          href="/admin/users/invite"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          Invite User
+        </Link>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
@@ -175,8 +183,8 @@ export default async function UsersPage() {
 
       <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
         <p className="text-sm text-blue-800">
-          <strong>Note:</strong> Users are created automatically when they sign in with their email
-          address. To invite a user, ask them to visit the sign-in page and enter their email.
+          <strong>Note:</strong> Users are created automatically when they sign in. Use the 
+          &quot;Invite User&quot; button to send an invitation with a pre-assigned role.
         </p>
       </div>
     </div>
