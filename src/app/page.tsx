@@ -1,7 +1,9 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSettings, formatChurchAddress } from "@/lib/settings";
 import { getActiveEvent } from "@/lib/event";
 import { getSession } from "@/lib/auth";
+import { needsSetup } from "@/lib/setup";
 
 // Force dynamic rendering to avoid build-time Prisma calls
 export const dynamic = 'force-dynamic';
@@ -31,6 +33,12 @@ function YouTubeIcon({ className }: { className?: string }) {
 }
 
 export default async function Home() {
+  // Redirect to setup if no admin exists
+  const setupRequired = await needsSetup();
+  if (setupRequired) {
+    redirect("/setup");
+  }
+
   const settings = await getSettings();
   const session = await getSession();
   const address = formatChurchAddress(settings);

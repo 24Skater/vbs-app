@@ -7,12 +7,14 @@ interface RegisterFormProps {
   inviteToken?: string;
   invitedEmail?: string;
   invitedRole?: string;
+  primaryColor?: string;
 }
 
 export default function RegisterForm({
   inviteToken,
   invitedEmail,
   invitedRole,
+  primaryColor = "#2563eb",
 }: RegisterFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -192,7 +194,8 @@ export default function RegisterForm({
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-md px-4 py-2 text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        style={{ backgroundColor: primaryColor }}
       >
         {isLoading ? "Creating account..." : "Create account"}
       </button>

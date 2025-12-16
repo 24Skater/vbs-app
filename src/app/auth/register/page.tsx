@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import { getSettings } from "@/lib/settings";
+import { needsSetup } from "@/lib/setup";
 import { validateInvitation } from "@/lib/invitations";
 import RegisterForm from "./RegisterForm";
 import Link from "next/link";
@@ -9,12 +11,20 @@ interface RegisterPageProps {
 }
 
 export default async function RegisterPage({ searchParams }: RegisterPageProps) {
+  // Redirect to setup if no admin exists
+  const setupRequired = await needsSetup();
+  if (setupRequired) {
+    redirect("/setup");
+  }
+
   const session = await getSession();
   const params = await searchParams;
 
   if (session) {
     redirect("/dashboard");
   }
+
+  const settings = await getSettings();
 
   // Check if there's a valid invitation token
   let invitation = null;
@@ -23,13 +33,26 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-md">
-        <div>
-          <h1 className="text-center text-3xl font-bold text-gray-900">
-            VBS App
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-8 shadow-lg">
+        {/* Logo and Branding */}
+        <div className="text-center">
+          {settings.logoUrl && (
+            <div className="flex justify-center mb-4">
+              <img
+                src={settings.logoUrl}
+                alt={settings.siteName}
+                className="h-12 w-auto"
+              />
+            </div>
+          )}
+          <h1
+            className="text-3xl font-bold"
+            style={{ color: settings.primaryColor }}
+          >
+            {settings.siteName}
           </h1>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-600">
             {invitation
               ? "You've been invited to join"
               : "Create your account"}
@@ -50,10 +73,16 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           inviteToken={params.token}
           invitedEmail={invitation?.email}
           invitedRole={invitation?.role}
+          primaryColor={settings.primaryColor}
         />
+        
         <p className="text-center text-sm text-gray-600">
           Already have an account?{" "}
-          <Link href="/auth/signin" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link 
+            href="/auth/signin" 
+            className="font-medium hover:opacity-80"
+            style={{ color: settings.primaryColor }}
+          >
             Sign in
           </Link>
         </p>
@@ -61,4 +90,3 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
     </div>
   );
 }
-
