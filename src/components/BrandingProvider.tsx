@@ -1,0 +1,78 @@
+"use client";
+
+import { createContext, useContext, ReactNode } from "react";
+
+export type BrandingSettings = {
+  siteName: string;
+  primaryColor: string;
+  secondaryColor: string;
+  logoUrl: string | null;
+  churchName: string | null;
+  churchAddress: string | null;
+  churchCity: string | null;
+  churchState: string | null;
+  churchZip: string | null;
+  churchPhone: string | null;
+  churchEmail: string | null;
+  churchWebsite: string | null;
+  tagline: string | null;
+  welcomeMessage: string | null;
+  footerText: string | null;
+  facebookUrl: string | null;
+  instagramUrl: string | null;
+  youtubeUrl: string | null;
+};
+
+const defaultBranding: BrandingSettings = {
+  siteName: "VBS App",
+  primaryColor: "#2563eb",
+  secondaryColor: "#1e40af",
+  logoUrl: null,
+  churchName: null,
+  churchAddress: null,
+  churchCity: null,
+  churchState: null,
+  churchZip: null,
+  churchPhone: null,
+  churchEmail: null,
+  churchWebsite: null,
+  tagline: null,
+  welcomeMessage: null,
+  footerText: null,
+  facebookUrl: null,
+  instagramUrl: null,
+  youtubeUrl: null,
+};
+
+const BrandingContext = createContext<BrandingSettings>(defaultBranding);
+
+export function useBranding() {
+  return useContext(BrandingContext);
+}
+
+export function BrandingProvider({
+  children,
+  settings,
+}: {
+  children: ReactNode;
+  settings: BrandingSettings;
+}) {
+  return (
+    <BrandingContext.Provider value={settings}>
+      {children}
+    </BrandingContext.Provider>
+  );
+}
+
+export function formatAddress(settings: BrandingSettings): string | null {
+  const parts = [
+    settings.churchAddress,
+    settings.churchCity,
+    settings.churchState && settings.churchZip
+      ? `${settings.churchState} ${settings.churchZip}`
+      : settings.churchState || settings.churchZip,
+  ].filter(Boolean);
+
+  return parts.length > 0 ? parts.join(", ") : null;
+}
+

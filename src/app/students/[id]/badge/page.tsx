@@ -83,6 +83,8 @@ export default async function BadgePage({ params }: Props) {
           siteName: settings.siteName,
           primaryColor: settings.primaryColor,
           logoUrl: settings.logoUrl,
+          churchName: settings.churchName,
+          tagline: settings.tagline,
         }}
       />
     </div>

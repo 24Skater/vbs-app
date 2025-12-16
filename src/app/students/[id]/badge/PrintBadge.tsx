@@ -24,6 +24,8 @@ interface PrintBadgeProps {
     siteName: string;
     primaryColor: string;
     logoUrl: string | null;
+    churchName: string | null;
+    tagline: string | null;
   };
 }
 
@@ -59,11 +61,17 @@ export default function PrintBadge({ student, event, emergency, settings }: Prin
           >
             <div className="flex items-center justify-center gap-2">
               {settings.logoUrl && (
-                <img src={settings.logoUrl} alt="" className="h-8 w-auto" />
+                <img src={settings.logoUrl} alt="" className="h-10 w-auto brightness-0 invert" />
               )}
               <div>
+                {settings.churchName && (
+                  <div className="text-xs opacity-80">{settings.churchName}</div>
+                )}
                 <div className="font-bold text-lg">{settings.siteName}</div>
-                <div className="text-sm opacity-90">
+                {settings.tagline && (
+                  <div className="text-xs opacity-80">{settings.tagline}</div>
+                )}
+                <div className="text-sm opacity-90 mt-1">
                   {event.year} {event.theme && `• ${event.theme}`}
                 </div>
               </div>

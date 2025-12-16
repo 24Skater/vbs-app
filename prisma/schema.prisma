@@ -90,12 +90,36 @@ enum UserRole {
 // --- Configuration & Settings ---
 
 model AppSettings {
-  id          String   @id @default("singleton")
-  siteName    String   @default("VBS App")
-  primaryColor String  @default("#2563eb")
-  logoUrl     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default("singleton")
+  
+  // Basic Branding
+  siteName       String   @default("VBS App")
+  primaryColor   String   @default("#2563eb")
+  secondaryColor String   @default("#1e40af")
+  logoUrl        String?
+  
+  // Church Information
+  churchName     String?
+  churchAddress  String?
+  churchCity     String?
+  churchState    String?
+  churchZip      String?
+  churchPhone    String?
+  churchEmail    String?
+  churchWebsite  String?
+  
+  // Additional Branding
+  tagline        String?  // e.g., "Growing in Faith Together"
+  welcomeMessage String?  // Custom welcome message for landing page
+  footerText     String?  // Custom footer text
+  
+  // Social Media
+  facebookUrl    String?
+  instagramUrl   String?
+  youtubeUrl     String?
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model StudentCategory {
