@@ -1,6 +1,12 @@
-# VBS App - Vacation Bible School Management System
+<div align="center">
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+# 🏕️ VBS App
+
+### Vacation Bible School Management System
+
+*A modern, full-featured solution for managing your VBS events*
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Node.js](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.4.5-blue)
@@ -11,7 +17,11 @@
 ![Pull Requests](https://img.shields.io/github/issues-pr/24Skater/vbs-app)
 ![Security](https://img.shields.io/badge/security-policy-yellow.svg)
 
-A comprehensive, self-hosted application for managing Vacation Bible School events, students, attendance, and schedules.
+---
+
+**A comprehensive, self-hosted application for managing Vacation Bible School events, students, attendance, and schedules.**
+
+</div>
 
 ## Features
 
