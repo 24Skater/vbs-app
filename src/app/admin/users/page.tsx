@@ -5,12 +5,18 @@ import { requireRole } from "@/lib/auth";
 import { UserRole } from "@/lib/constants";
 import { ValidationError } from "@/lib/errors";
 import { auditLog } from "@/lib/audit-log";
+import RoleSelect from "@/components/RoleSelect";
 
-async function updateUserRole(userId: string, formData: FormData) {
+async function updateUserRole(formData: FormData) {
   "use server";
   const session = await requireRole("ADMIN");
 
+  const userId = formData.get("userId")?.toString();
   const role = formData.get("role")?.toString();
+
+  if (!userId) {
+    throw new ValidationError("User ID required");
+  }
   
   // Validate role
   if (!role || !["ADMIN", "STAFF", "VIEWER"].includes(role)) {
@@ -125,26 +131,13 @@ export default async function UsersPage() {
                   {user.email}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm">
-                  <form action={updateUserRole.bind(null, user.id)} className="inline">
-                    <select
-                      name="role"
-                      defaultValue={user.role}
-                      onChange={(e) => {
-                        if (confirm(`Change ${user.email} role to ${e.target.value}?`)) {
-                          e.target.form?.requestSubmit();
-                        } else {
-                          e.target.value = user.role;
-                        }
-                      }}
-                      className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                        roleColors[user.role] || roleColors.VIEWER
-                      } border-0 focus:ring-2 focus:ring-blue-500`}
-                    >
-                      <option value="ADMIN">ADMIN</option>
-                      <option value="STAFF">STAFF</option>
-                      <option value="VIEWER">VIEWER</option>
-                    </select>
-                  </form>
+                  <RoleSelect
+                    userId={user.id}
+                    userEmail={user.email}
+                    currentRole={user.role}
+                    roleColors={roleColors}
+                    updateAction={updateUserRole}
+                  />
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm">
                   {user.emailVerified ? (
@@ -161,12 +154,7 @@ export default async function UsersPage() {
                   {new Date(user.createdAt).toLocaleDateString()}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                  <Link
-                    href={`/admin/users/${user.id}`}
-                    className="text-blue-600 hover:text-blue-900"
-                  >
-                    View
-                  </Link>
+                  <span className="text-gray-400">—</span>
                 </td>
               </tr>
             ))}

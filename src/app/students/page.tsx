@@ -83,7 +83,15 @@ export default async function StudentsPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Students</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">Students</h1>
+        <Link
+          href="/students/new"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          Add Student
+        </Link>
+      </div>
 
       <StudentsFilters sizes={sizes} categories={categories} />
 

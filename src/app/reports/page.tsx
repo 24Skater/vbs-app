@@ -1,0 +1,159 @@
+import Link from "next/link";
+import { requireRole } from "@/lib/auth";
+import { getActiveEvent } from "@/lib/event";
+import { prisma } from "@/lib/prisma";
+
+export default async function ReportsPage() {
+  await requireRole("STAFF");
+
+  let event;
+  let stats = { students: 0, categories: 0, teachers: 0, attendance: 0 };
+
+  try {
+    event = await getActiveEvent();
+    const [studentCount, categoryCount, teacherCount, attendanceCount] = await Promise.all([
+      prisma.student.count({ where: { eventId: event.id } }),
+      prisma.studentCategory.count({ where: { eventId: event.id } }),
+      prisma.teacher.count({ where: { isActive: true } }),
+      prisma.attendance.count({ where: { eventId: event.id } }),
+    ]);
+    stats = {
+      students: studentCount,
+      categories: categoryCount,
+      teachers: teacherCount,
+      attendance: attendanceCount,
+    };
+  } catch {
+    // No active event
+  }
+
+  const reports = [
+    {
+      id: "students",
+      title: "Student List Report",
+      description: "Export student roster with customizable fields. Filter by category, teacher, or export all.",
+      icon: "👥",
+      href: "/reports/students",
+      color: "blue",
+      stats: `${stats.students} students`,
+    },
+    {
+      id: "attendance",
+      title: "Attendance Report",
+      description: "View check-in status, who attended and who didn't. Filter by date or date range.",
+      icon: "✅",
+      href: "/reports/attendance",
+      color: "green",
+      stats: `${stats.attendance} check-ins`,
+    },
+    {
+      id: "schedule",
+      title: "Schedule Report",
+      description: "Export event schedules by group or for the entire event.",
+      icon: "📅",
+      href: "/reports/schedule",
+      color: "purple",
+      stats: event ? `${event.year} Event` : "No active event",
+    },
+    {
+      id: "enrollment",
+      title: "Enrollment Report",
+      description: "Track enrollment status, payment status, and registration completion.",
+      icon: "📋",
+      href: "/reports/enrollment",
+      color: "amber",
+      stats: `${stats.students} enrolled`,
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
+        <p className="mt-1 text-sm text-gray-600">
+          Generate and export reports for your VBS event
+        </p>
+      </div>
+
+      {!event && (
+        <div className="rounded-md bg-yellow-50 border border-yellow-200 p-4">
+          <p className="text-sm text-yellow-800">
+            ⚠️ No active event found. Please activate an event to generate reports.
+          </p>
+        </div>
+      )}
+
+      <div className="grid gap-6 sm:grid-cols-2">
+        {reports.map((report) => (
+          <Link
+            key={report.id}
+            href={report.href}
+            className={`group relative rounded-xl border-2 p-6 transition-all hover:shadow-lg ${
+              report.color === "blue"
+                ? "border-blue-200 hover:border-blue-400 bg-gradient-to-br from-blue-50 to-white"
+                : report.color === "green"
+                ? "border-green-200 hover:border-green-400 bg-gradient-to-br from-green-50 to-white"
+                : report.color === "purple"
+                ? "border-purple-200 hover:border-purple-400 bg-gradient-to-br from-purple-50 to-white"
+                : "border-amber-200 hover:border-amber-400 bg-gradient-to-br from-amber-50 to-white"
+            }`}
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className={`flex h-14 w-14 items-center justify-center rounded-xl text-2xl ${
+                  report.color === "blue"
+                    ? "bg-blue-100"
+                    : report.color === "green"
+                    ? "bg-green-100"
+                    : report.color === "purple"
+                    ? "bg-purple-100"
+                    : "bg-amber-100"
+                }`}
+              >
+                {report.icon}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600">
+                  {report.title}
+                </h3>
+                <p className="mt-1 text-sm text-gray-600">{report.description}</p>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-xs font-medium text-gray-500">{report.stats}</span>
+                  <span className="text-sm font-medium text-blue-600 group-hover:translate-x-1 transition-transform">
+                    Generate →
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Quick Stats */}
+      {event && (
+        <div className="rounded-xl border border-gray-200 bg-white p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Stats - {event.year}</h2>
+          <div className="grid gap-4 sm:grid-cols-4">
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-3xl font-bold text-blue-600">{stats.students}</div>
+              <div className="text-sm text-gray-500">Total Students</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-3xl font-bold text-green-600">{stats.categories}</div>
+              <div className="text-sm text-gray-500">Categories</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-3xl font-bold text-purple-600">{stats.teachers}</div>
+              <div className="text-sm text-gray-500">Teachers</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-3xl font-bold text-amber-600">{stats.attendance}</div>
+              <div className="text-sm text-gray-500">Check-ins</div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+

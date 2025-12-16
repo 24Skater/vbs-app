@@ -6,6 +6,7 @@ import { deleteCategory } from "@/lib/categories";
 import { requireRole } from "@/lib/auth";
 import { ValidationError } from "@/lib/errors";
 import { auditLog } from "@/lib/audit-log";
+import ConfirmButton from "@/components/ConfirmButton";
 
 async function deleteCategoryAction(id: number) {
   "use server";
@@ -127,23 +128,12 @@ export default async function CategoriesPage() {
                       >
                         Edit
                       </Link>
-                      <form action={deleteCategoryAction.bind(null, category.id)} className="inline">
-                        <button
-                          type="submit"
-                          className="text-red-600 hover:text-red-900"
-                          onClick={(e) => {
-                            if (
-                              !confirm(
-                                `Delete category "${category.name}"? This will remove it from all students using it.`
-                              )
-                            ) {
-                              e.preventDefault();
-                            }
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </form>
+                      <ConfirmButton
+                        action={deleteCategoryAction.bind(null, category.id)}
+                        confirmMessage={`Delete category "${category.name}"? This will remove it from all students using it.`}
+                      >
+                        Delete
+                      </ConfirmButton>
                     </div>
                   </td>
                 </tr>
@@ -207,23 +197,12 @@ export default async function CategoriesPage() {
                           >
                             Edit
                           </Link>
-                          <form action={deleteCategoryAction.bind(null, category.id)} className="inline">
-                            <button
-                              type="submit"
-                              className="text-red-600 hover:text-red-900"
-                              onClick={(e) => {
-                                if (
-                                  !confirm(
-                                    `Delete category "${category.name}"? This will remove it from all students using it.`
-                                  )
-                                ) {
-                                  e.preventDefault();
-                                }
-                              }}
-                            >
-                              Delete
-                            </button>
-                          </form>
+                          <ConfirmButton
+                            action={deleteCategoryAction.bind(null, category.id)}
+                            confirmMessage={`Delete category "${category.name}"? This will remove it from all students using it.`}
+                          >
+                            Delete
+                          </ConfirmButton>
                         </div>
                       </td>
                     </tr>

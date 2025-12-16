@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth";
 import { ValidationError } from "@/lib/errors";
 import { auditLog } from "@/lib/audit-log";
 import { MIN_YEAR, MAX_YEAR, MAX_THEME_LENGTH } from "@/lib/constants";
+import DeleteButton from "@/components/DeleteButton";
 
 async function updateEvent(id: number, formData: FormData) {
   "use server";
@@ -291,19 +292,14 @@ export default async function EditEventPage({ params }: Props) {
               Deleting this event will also delete all associated students, attendance records,
               payments, and sessions. This action cannot be undone.
             </p>
-            <form action={deleteAction} className="mt-4">
-              <button
-                type="submit"
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                onClick={(e) => {
-                  if (!confirm("Are you sure you want to delete this event? This cannot be undone.")) {
-                    e.preventDefault();
-                  }
-                }}
+            <div className="mt-4">
+              <DeleteButton
+                action={deleteAction}
+                confirmMessage="Are you sure you want to delete this event? This cannot be undone."
               >
                 Delete Event
-              </button>
-            </form>
+              </DeleteButton>
+            </div>
           </div>
         </div>
       </div>

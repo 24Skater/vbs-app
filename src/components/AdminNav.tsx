@@ -10,6 +10,7 @@ export default function AdminNav() {
     { href: "/admin", label: "Dashboard" },
     { href: "/admin/events", label: "Events" },
     { href: "/admin/users", label: "Users" },
+    { href: "/admin/teachers", label: "Teachers" },
     { href: "/admin/categories", label: "Categories" },
     { href: "/admin/settings", label: "Settings" },
   ];

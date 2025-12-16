@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth";
 import { ValidationError } from "@/lib/errors";
 import { auditLog } from "@/lib/audit-log";
 import { MAX_SITE_NAME_LENGTH, MAX_URL_LENGTH } from "@/lib/constants";
+import ColorPicker from "@/components/ColorPicker";
 
 async function updateSettingsAction(formData: FormData) {
   "use server";
@@ -109,28 +110,7 @@ export default async function SettingsPage({
           <label htmlFor="primaryColor" className="block text-sm font-medium text-gray-700">
             Primary Color <span className="text-red-500">*</span>
           </label>
-          <div className="mt-1 flex gap-2">
-            <input
-              type="color"
-              id="colorPicker"
-              defaultValue={settings.primaryColor}
-              className="h-10 w-20 rounded border border-gray-300"
-              onChange={(e) => {
-                const textInput = document.getElementById("primaryColor") as HTMLInputElement;
-                if (textInput) textInput.value = e.target.value;
-              }}
-            />
-            <input
-              type="text"
-              id="primaryColor"
-              name="primaryColor"
-              required
-              defaultValue={settings.primaryColor}
-              placeholder="#2563eb"
-              pattern="^#[0-9A-Fa-f]{6}$"
-              className="block flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-            />
-          </div>
+          <ColorPicker name="primaryColor" defaultValue={settings.primaryColor} />
           <p className="mt-1 text-xs text-gray-500">
             Primary color used for buttons, links, and accents (hex format)
           </p>

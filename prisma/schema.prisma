@@ -143,16 +143,111 @@ model Student {
   categoryRef StudentCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId   Int
+  
+  // Profile Image (stored as base64 data URL)
+  profileImageUrl String?  // Legacy URL field
+  profileImage    String?  @db.Text // Base64 encoded image data
+  
+  // Additional student info
+  dateOfBirth     DateTime?
+  grade           String?
+  allergies       String?   // Medical/allergy notes
+  medicalNotes    String?
+  notes           String?   // General notes
+  
+  // Legacy single parent/emergency (kept for backward compatibility)
+  parentName      String?
+  parentPhone     String?
+  parentEmail     String?
+  emergencyContact      String?
+  emergencyPhone        String?
+  emergencyRelationship String?
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  attendances Attendance[]
-  payments    Payment[]
+  // Relationships
+  attendances       Attendance[]
+  payments          Payment[]
+  parents           StudentParent[]
+  emergencyContacts StudentEmergencyContact[]
+  teachers          StudentTeacher[]
 
   @@unique([eventId, name])
   @@index([eventId])
   @@index([eventId, category])
   @@index([categoryId])
+}
+
+// --- Parent/Guardian (supports multiple) ---
+
+model StudentParent {
+  id            Int      @id @default(autoincrement())
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId     Int
+  name          String
+  relationship  String?  // e.g., "Mother", "Father", "Guardian"
+  phone         String?
+  email         String?
+  isPrimary     Boolean  @default(false)
+  canPickup     Boolean  @default(true)
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([studentId])
+}
+
+// --- Emergency Contact (supports multiple) ---
+
+model StudentEmergencyContact {
+  id            Int      @id @default(autoincrement())
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId     Int
+  name          String
+  relationship  String?
+  phone         String
+  altPhone      String?
+  priority      Int      @default(1)  // 1 = primary, 2 = secondary, etc.
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([studentId, priority])
+}
+
+// --- Teachers/Volunteers ---
+
+model Teacher {
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String?
+  phone         String?
+  bio           String?
+  profileImageUrl String?  // Legacy URL field
+  profileImage    String?  @db.Text // Base64 encoded image data
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  students      StudentTeacher[]
+
+  @@index([isActive])
+}
+
+model StudentTeacher {
+  id          Int      @id @default(autoincrement())
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId   Int
+  teacher     Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacherId   Int
+  role        String?  // e.g., "Primary", "Assistant", "Small Group Leader"
+  assignedAt  DateTime @default(now())
+
+  @@unique([studentId, teacherId])
+  @@index([studentId])
+  @@index([teacherId])
 }
 
 // --- Attendance & Payment ---

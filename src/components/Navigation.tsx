@@ -111,6 +111,16 @@ export default function Navigation() {
                   >
                     Schedule
                   </Link>
+                  <Link
+                    href="/reports"
+                    className={`text-sm font-medium ${
+                      pathname?.startsWith("/reports")
+                        ? "text-blue-600"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    Reports
+                  </Link>
                 </>
               )}
               {session.user.role === "ADMIN" && (

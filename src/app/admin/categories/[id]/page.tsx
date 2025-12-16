@@ -9,6 +9,7 @@ import {
   MAX_CATEGORY_NAME_LENGTH,
   MAX_DESCRIPTION_LENGTH,
 } from "@/lib/constants";
+import ColorPicker from "@/components/ColorPicker";
 
 async function updateCategoryAction(id: number, formData: FormData) {
   "use server";
@@ -183,27 +184,7 @@ export default async function EditCategoryPage({ params }: Props) {
             <label htmlFor="color" className="block text-sm font-medium text-gray-700">
               Color (Hex)
             </label>
-            <div className="mt-1 flex gap-2">
-              <input
-                type="color"
-                id="colorPicker"
-                defaultValue={category.color || "#2563eb"}
-                className="h-10 w-20 rounded border border-gray-300"
-                onChange={(e) => {
-                  const textInput = document.getElementById("color") as HTMLInputElement;
-                  if (textInput) textInput.value = e.target.value;
-                }}
-              />
-              <input
-                type="text"
-                id="color"
-                name="color"
-                defaultValue={category.color || ""}
-                placeholder="#2563eb"
-                pattern="^#[0-9A-Fa-f]{6}$"
-                className="block flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-              />
-            </div>
+            <ColorPicker name="color" defaultValue={category.color || ""} />
           </div>
 
           <div>
