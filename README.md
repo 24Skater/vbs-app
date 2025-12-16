@@ -8,7 +8,7 @@
 ![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
 ![Contributors](https://img.shields.io/github/contributors/YOUR_USERNAME/vbs-app)
 ![Issues](https://img.shields.io/github/issues/YOUR_USERNAME/vbs-app)
-![Pull Requests](https://img.shields.io/github/issues-pr/YOUR_USERNAME/vbs-app)
+![Pull Requests](https://img.shields.io/github/issues-pr/24Skater/vbs-app)
 ![Security](https://img.shields.io/badge/security-policy-yellow.svg)
 
 A comprehensive, self-hosted application for managing Vacation Bible School events, students, attendance, and schedules.
