@@ -6,8 +6,8 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.4.5-blue)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-blue)
 ![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
-![Contributors](https://img.shields.io/github/contributors/YOUR_USERNAME/vbs-app)
-![Issues](https://img.shields.io/github/issues/YOUR_USERNAME/vbs-app)
+![Contributors](https://img.shields.io/github/contributors/24Skater/vbs-app)
+![Issues](https://img.shields.io/github/issues/24Skater/vbs-app)
 ![Pull Requests](https://img.shields.io/github/issues-pr/24Skater/vbs-app)
 ![Security](https://img.shields.io/badge/security-policy-yellow.svg)
 
