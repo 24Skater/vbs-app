@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import OAuthButtons from "./OAuthButtons";
 
@@ -14,16 +14,17 @@ interface SignInFormProps {
 
 export default function SignInForm({ primaryColor = "#2563eb" }: SignInFormProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [authMode, setAuthMode] = useState<AuthMode>("magic-link");
+  const [authMode, setAuthMode] = useState<AuthMode>("password"); // Default to password
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [lockoutMessage, setLockoutMessage] = useState<string | null>(null);
 
   // Show success message if user just registered
-  const justRegistered = searchParams.get("registered") === "true";
+  const justRegistered = searchParams?.get("registered") === "true";
 
   // Check for account lockout
   useEffect(() => {
@@ -82,6 +83,8 @@ export default function SignInForm({ primaryColor = "#2563eb" }: SignInFormProps
           redirect: false,
         });
 
+        console.log("Sign in result:", result);
+
         if (result?.error) {
           setError("Invalid email or password");
           // Re-check lockout status after failed attempt
@@ -90,7 +93,11 @@ export default function SignInForm({ primaryColor = "#2563eb" }: SignInFormProps
           }
         } else if (result?.ok) {
           // Successful login - redirect to dashboard
-          window.location.href = "/dashboard";
+          router.push("/dashboard");
+          router.refresh();
+        } else {
+          // Unexpected result
+          setError("Sign in failed. Please try again.");
         }
       }
     } catch {

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 import { getSession } from "@/lib/auth";
 import { getSettings } from "@/lib/settings";
 import { needsSetup } from "@/lib/setup";
@@ -82,7 +83,9 @@ export default async function SignInPage({
         )}
 
         {/* Sign In Form */}
-        <SignInForm primaryColor={settings.primaryColor} />
+        <Suspense fallback={<div className="text-center text-gray-500">Loading...</div>}>
+          <SignInForm primaryColor={settings.primaryColor} />
+        </Suspense>
 
         {/* Back to Home */}
         <div className="text-center">

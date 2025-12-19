@@ -9,7 +9,7 @@ export default async function SetupPage() {
   // Block access if setup is already complete
   const setupRequired = await needsSetup();
   if (!setupRequired) {
-    redirect("/");
+    redirect("/auth/signin");
   }
 
   let settings;
