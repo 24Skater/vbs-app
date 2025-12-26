@@ -31,8 +31,12 @@
 - **Attendance Records**: View and export attendance data
 - **Admin Panel**: Configure events, users, categories, and application settings
 - **Role-Based Access Control**: Admin, Staff, and Viewer roles
-- **Branding Customization**: Customize site name, logo, and colors from the admin panel
+- **Branding Customization**: Customize church name, logo, colors, and contact info
 - **Modern Landing Page**: Beautiful, responsive landing page with admin-configurable branding
+- **Google Forms Integration**: Self-service student registration via Google Forms
+- **Reports Module**: Export student lists, attendance, schedules, and enrollment reports
+- **Dashboard Analytics**: Visual charts for categories, teachers, age distribution, and payments
+- **First-Launch Setup**: Guided setup wizard for first-time installation
 
 ## Tech Stack
 
@@ -181,47 +185,53 @@ The app will be available at `http://localhost:3000` (or your configured port).
 
 ## First-Time Setup
 
-1. **Sign in**: Go to `/auth/signin` and enter your email
-2. **Check logs**: In development mode, the magic link will be logged to the console
-3. **Set admin role**: The first user needs to be manually set as ADMIN in the database:
+VBS App includes a **setup wizard** that automatically appears on first launch:
 
-   ```sql
-   UPDATE "User" SET role = 'ADMIN' WHERE email = 'your-email@example.com';
-   ```
-
-   Or use Prisma Studio:
-
-   ```bash
-   npx prisma studio
-   ```
-
-4. **Configure settings**: Go to `/admin/settings` to customize:
-   - Site name
-   - Primary color
-   - Logo URL
-
+1. **Visit the app**: Go to `http://localhost:3000`
+2. **Create admin account**: You'll be redirected to `/setup` to create the first admin
+3. **Sign in**: Use your new credentials at `/auth/signin`
+4. **Configure branding**: Go to `/admin/settings` to customize:
+   - Church name, address, contact info
+   - Logo upload
+   - Primary/secondary colors
+   - Social media links
+   - Welcome message
 5. **Create an event**: Go to `/admin/events/new` to create your first VBS event
 6. **Set active event**: Mark the event as active in `/admin/events`
+7. **(Optional) Enable Google Forms**: Go to `/admin/integrations/google-forms` for self-service registration
 
 ## Project Structure
 
 ```
 vbs-app/
 ├── prisma/
-│   ├── schema.prisma      # Database schema
-│   ├── migrations/        # Database migrations
-│   └── seed.ts           # Seed script
+│   ├── schema.prisma         # Database schema
+│   ├── migrations/           # Database migrations
+│   └── seed.ts               # Seed script
 ├── src/
-│   ├── app/              # Next.js app router pages
-│   │   ├── admin/        # Admin panel pages
-│   │   ├── auth/         # Authentication pages
-│   │   └── api/          # API routes
-│   ├── components/       # React components
-│   └── lib/              # Utility functions and configurations
-├── public/               # Static assets
-├── docker-compose.yml    # Development database only
-├── docker-compose.prod.yml  # Production deployment
-├── Dockerfile            # Production Docker image
+│   ├── app/
+│   │   ├── admin/            # Admin panel pages
+│   │   │   ├── integrations/ # Google Forms, etc.
+│   │   │   ├── settings/     # Branding & settings
+│   │   │   └── ...
+│   │   ├── auth/             # Authentication pages
+│   │   ├── setup/            # First-launch setup wizard
+│   │   ├── students/         # Student management
+│   │   ├── reports/          # Reports module
+│   │   ├── dashboard/        # Dashboard with analytics
+│   │   └── api/              # API routes
+│   │       └── webhooks/     # Google Forms webhook
+│   ├── components/           # React components
+│   └── lib/                  # Utilities & configurations
+├── Docs/
+│   ├── GOOGLE_FORMS_INTEGRATION.md
+│   ├── PRODUCTION_ENV_EXAMPLE.md
+│   ├── PRODUCTION_ROADMAP.md
+│   └── ...
+├── docker-compose.yml        # Development (database only)
+├── docker-compose.prod.yml   # Production deployment
+├── docker-compose.traefik.yml # Production with auto-SSL
+├── Dockerfile                # Production Docker image
 └── README.md
 ```
 
@@ -262,8 +272,19 @@ In development mode, if email is not configured, magic links will be logged to t
 - Account lockout after failed login attempts
 - Role-based access control (RBAC)
 - IDOR protection on all resources
+- Webhook secret validation for Google Forms integration
+- Image upload validation and size limits
 
 See `Docs/SECURITY_COMPLETE.md` for detailed security documentation.
+
+### Recommended Deployment Security
+
+For production deployments, we recommend:
+
+1. **Cloudflare Tunnel** - No open ports on your router
+2. **HTTPS only** - Auto-SSL via Traefik or Cloudflare
+3. **Strong passwords** - Enforce via the built-in password policy
+4. **Regular backups** - Database backups before updates
 
 ## Contributing
 
@@ -279,10 +300,34 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For issues, questions, or contributions, please open an issue on the GitHub repository.
 
+## Integrations
+
+### Google Forms (Self-Service Registration)
+
+Parents can register students via a Google Form that automatically syncs to VBS App.
+
+1. Enable in **Admin → Google Forms**
+2. Create a Google Form with student fields
+3. Add the provided Apps Script
+4. Students appear automatically in VBS App!
+
+See `Docs/GOOGLE_FORMS_INTEGRATION.md` for detailed setup instructions.
+
+### Deployment Options
+
+- **Cloudflare Tunnel** (Recommended) - Zero open ports, free SSL
+- **Traefik Reverse Proxy** - Auto SSL with Let's Encrypt
+- **Docker Compose** - Standard container deployment
+
+See `Docs/PRODUCTION_ENV_EXAMPLE.md` for configuration details.
+
 ## Roadmap
 
+- [x] Google Forms integration
+- [x] Advanced reporting and analytics
+- [x] Dashboard with charts and stats
 - [ ] Email notifications
-- [ ] Advanced reporting and analytics
-- [ ] Mobile app
+- [ ] Mobile app / PWA
 - [ ] Multi-language support
-- [ ] Integration with church management systems
+- [ ] Planning Center integration
+- [ ] Online payment processing
