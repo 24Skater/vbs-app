@@ -1,128 +1,92 @@
-# Contributor Covenant Code of Conduct
+# Code of Conduct
+
+## Our Faith Foundation
+
+This project is built by followers of Jesus Christ, our Lord and Savior.
+
+> *"For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life."* — John 3:16
+
+We believe:
+
+- **Jesus Christ** is the Son of God who died on the cross for our sins
+- **He rose again** on the third day, conquering death and sin
+- **Salvation** comes through faith in Jesus Christ alone — He is the way, the truth, and the life (John 14:6)
+- **We are called** to love God and love others as ourselves (Matthew 22:37-39)
+
+This project exists to serve churches and ministries in spreading the Gospel and nurturing the faith of children through Vacation Bible School programs.
+
+---
 
 ## Our Pledge
 
-We as members, contributors, and leaders pledge to make participation in our
-community a harassment-free experience for everyone, regardless of age, body
-size, visible or invisible disability, ethnicity, sex characteristics, gender
-identity and expression, level of experience, education, socio-economic status,
-nationality, personal appearance, race, religion, or sexual identity
-and orientation.
+As followers of Christ, we pledge to reflect His love in all our interactions. We commit to making participation in our community a welcoming experience for everyone, treating all people with the dignity and respect that comes from being created in God's image.
 
-We pledge to act and interact in ways that contribute to an open, welcoming,
-diverse, inclusive, and healthy community.
+We pledge to act and interact in ways that demonstrate:
+- The love of Christ
+- Grace and forgiveness
+- Humility and servanthood
+- Truth spoken in love
 
 ## Our Standards
 
-Examples of behavior that contributes to a positive environment for our
-community include:
+### Christ-like Behavior
 
-* Demonstrating empathy and kindness toward other people
-* Being respectful of differing opinions, viewpoints, and experiences
-* Giving and gracefully accepting constructive feedback
-* Accepting responsibility and apologizing to those affected by our mistakes,
-  and learning from the experience
-* Focusing on what is best not just for us as individuals, but for the
-  overall community
+Examples of behavior that honors God and contributes to a positive community:
 
-Examples of unacceptable behavior include:
+* **Demonstrating love and kindness** — "Be kind and compassionate to one another" (Ephesians 4:32)
+* **Being patient and gentle** — "A gentle answer turns away wrath" (Proverbs 15:1)
+* **Showing humility** — "Do nothing out of selfish ambition or vain conceit" (Philippians 2:3)
+* **Speaking truth in love** — "Speaking the truth in love, we will grow" (Ephesians 4:15)
+* **Accepting responsibility** — Confessing mistakes and seeking reconciliation
+* **Serving others** — Focusing on what helps the community, not just ourselves
+* **Encouraging one another** — "Therefore encourage one another and build each other up" (1 Thessalonians 5:11)
 
-* The use of sexualized language or imagery, and sexual attention or
-  advances of any kind
-* Trolling, insulting or derogatory comments, and personal or political attacks
-* Public or private harassment
-* Publishing others' private information, such as a physical or email
-  address, without their explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
-  professional setting
+### Unacceptable Behavior
+
+Examples of behavior that does not reflect Christ:
+
+* Hateful, demeaning, or disrespectful language toward any person
+* Harassment of any kind, public or private
+* Trolling, insults, or personal attacks
+* Publishing others' private information without permission
+* Any conduct that would dishonor Christ or His church
 
 ## Enforcement Responsibilities
 
-Community leaders are responsible for clarifying and enforcing our standards of
-acceptable behavior and will take appropriate and fair corrective action in
-response to any behavior that they deem inappropriate, threatening, offensive,
-or harmful.
+Community leaders, as servants of Christ and this community, are responsible for clarifying and upholding these standards. They will take appropriate action in response to behavior that violates this Code of Conduct, always seeking restoration when possible.
 
-Community leaders have the right and responsibility to remove, edit, or reject
-comments, commits, code, wiki edits, issues, and other contributions that are
-not aligned to this Code of Conduct, or to ban temporarily or permanently
-any contributor for other behaviors that they deem inappropriate, threatening,
-offensive, or harmful.
+Leaders have the responsibility to remove, edit, or reject contributions that do not align with this Code of Conduct, and to address contributors whose behavior is harmful to the community.
 
 ## Scope
 
-This Code of Conduct applies within all community spaces, and also applies when
-an individual is officially representing the community in public spaces.
-Examples of representing our community include using an official e-mail address,
-posting via an official social media account, or acting as an appointed
-representative at an online or offline event.
+This Code of Conduct applies within all project spaces—GitHub issues, pull requests, discussions, and any other community channels. It also applies when representing the project publicly.
 
-## Enforcement
+## Reporting & Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-[INSERT CONTACT METHOD]. All complaints will be reviewed and investigated
-promptly and fairly.
+If you experience or witness unacceptable behavior, please report it to the project maintainers. All reports will be handled with discretion and care.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+We believe in:
+- **Grace first** — Seeking understanding and restoration
+- **Fair process** — Listening to all sides
+- **Appropriate action** — Protecting the community while offering opportunity for repentance
 
-## Enforcement Guidelines
+### Consequences
 
-Community leaders will follow these Community Impact Guidelines in determining
-the consequences for any action they deem in violation of this Code of Conduct:
+1. **Correction** — A private conversation seeking understanding and restoration
+2. **Warning** — A formal warning with clear expectations
+3. **Temporary Suspension** — A period of separation from the community
+4. **Permanent Removal** — For persistent or severe violations
 
-### 1. Correction
-**Community Impact**: Use of inappropriate language or other behavior deemed
-unprofessional or unwelcome in the community.
+## A Prayer for Our Community
 
-**Consequence**: A private, written warning from community leaders, providing
-clarity around the nature of the violation and an explanation of why the
-behavior was inappropriate. A public apology may be requested.
+*Lord, help us to build this project in a way that honors You. Give us wisdom, patience, and love for one another. May this tool serve Your churches well and bring glory to Your name. Let everything we do be done in love. In Jesus' name, Amen.*
 
-### 2. Warning
-**Community Impact**: A violation through a single incident or series
-of actions.
-
-**Consequence**: A warning with consequences for continued behavior. No
-interaction with the people involved, including unsolicited interaction with
-those enforcing the Code of Conduct, for a specified period of time. This
-includes avoiding interactions in community spaces as well as external channels
-like social media. Violating these terms may lead to a temporary or
-permanent ban.
-
-### 3. Temporary Ban
-**Community Impact**: A serious violation of community standards, including
-sustained inappropriate behavior.
-
-**Consequence**: A temporary ban from any sort of interaction or public
-communication with the community for a specified period of time. No public or
-private interaction with the people involved, including unsolicited interaction
-with those enforcing the Code of Conduct, is allowed during this period.
-Violating these terms may lead to a permanent ban.
-
-### 4. Permanent Ban
-**Community Impact**: Demonstrating a pattern of violation of community
-standards, including sustained inappropriate behavior,  harassment of an
-individual, or aggression toward or disparagement of classes of individuals.
-
-**Consequence**: A permanent ban from any sort of public interaction within
-the community.
+---
 
 ## Attribution
 
-This Code of Conduct is adapted from the [Contributor Covenant][homepage],
-version 2.1, available at
-https://www.contributor-covenant.org/version/2/1/code_of_conduct.html
+This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org/), version 2.1, with additions reflecting our faith in Jesus Christ.
 
-Community Impact Guidelines were inspired by
-[Mozilla's code of conduct enforcement ladder][Mozilla CoC].
+---
 
-For answers to common questions about this code of conduct, see
-https://www.contributor-covenant.org/faq
-
-[homepage]: https://www.contributor-covenant.org
-[Mozilla CoC]: https://github.com/mozilla/diversity
-
-
-
+*"Whatever you do, work at it with all your heart, as working for the Lord, not for human masters."* — Colossians 3:23
