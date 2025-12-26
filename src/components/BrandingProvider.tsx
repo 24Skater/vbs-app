@@ -21,6 +21,8 @@ export type BrandingSettings = {
   facebookUrl: string | null;
   instagramUrl: string | null;
   youtubeUrl: string | null;
+  googleFormsEnabled: boolean;
+  googleFormsUrl: string | null;
 };
 
 const defaultBranding: BrandingSettings = {
@@ -42,6 +44,8 @@ const defaultBranding: BrandingSettings = {
   facebookUrl: null,
   instagramUrl: null,
   youtubeUrl: null,
+  googleFormsEnabled: false,
+  googleFormsUrl: null,
 };
 
 const BrandingContext = createContext<BrandingSettings>(defaultBranding);

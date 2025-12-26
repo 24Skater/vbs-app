@@ -1,0 +1,106 @@
+# Production deployment with Traefik reverse proxy and automatic SSL
+# 
+# Usage:
+#   1. Update the domain and email in this file
+#   2. Run: docker compose -f docker-compose.traefik.yml up -d
+#
+# This provides:
+#   - Automatic SSL certificates via Let's Encrypt
+#   - Secure HTTPS access
+#   - Public URL for Google Forms webhook
+
+version: '3.8'
+
+services:
+  # Traefik Reverse Proxy
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      # IMPORTANT: Update this email
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@yourchurch.org"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-certificates:/letsencrypt
+    networks:
+      - vbs-network
+
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: vbs-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Database password required}
+      POSTGRES_DB: ${POSTGRES_DB:-vbsdb}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vbs-network
+
+  # VBS Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vbs-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-vbsdb}?schema=public
+      
+      # NextAuth - IMPORTANT: Update these
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NextAuth secret required}
+      NEXTAUTH_URL: https://${DOMAIN:-vbs.yourchurch.org}
+      
+      # Email (optional - for magic link login)
+      EMAIL_SERVER_HOST: ${EMAIL_SERVER_HOST:-}
+      EMAIL_SERVER_PORT: ${EMAIL_SERVER_PORT:-587}
+      EMAIL_SERVER_USER: ${EMAIL_SERVER_USER:-}
+      EMAIL_SERVER_PASSWORD: ${EMAIL_SERVER_PASSWORD:-}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@yourchurch.org}
+      
+      # OAuth (optional)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    labels:
+      - "traefik.enable=true"
+      # IMPORTANT: Update this domain
+      - "traefik.http.routers.vbs.rule=Host(`${DOMAIN:-vbs.yourchurch.org}`)"
+      - "traefik.http.routers.vbs.entrypoints=websecure"
+      - "traefik.http.routers.vbs.tls.certresolver=letsencrypt"
+      - "traefik.http.services.vbs.loadbalancer.server.port=3000"
+    networks:
+      - vbs-network
+
+volumes:
+  postgres-data:
+  traefik-certificates:
+
+networks:
+  vbs-network:
+    driver: bridge
+

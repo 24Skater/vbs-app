@@ -48,6 +48,8 @@ export default async function RootLayout({
       facebookUrl: settings.facebookUrl,
       instagramUrl: settings.instagramUrl,
       youtubeUrl: settings.youtubeUrl,
+      googleFormsEnabled: settings.googleFormsEnabled,
+      googleFormsUrl: settings.googleFormsUrl,
     };
   } catch {
     branding = {
@@ -69,6 +71,8 @@ export default async function RootLayout({
       facebookUrl: null,
       instagramUrl: null,
       youtubeUrl: null,
+      googleFormsEnabled: false,
+      googleFormsUrl: null,
     };
   }
 

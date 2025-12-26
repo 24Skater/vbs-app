@@ -118,6 +118,12 @@ model AppSettings {
   instagramUrl   String?
   youtubeUrl     String?
   
+  // Google Forms Integration
+  googleFormsEnabled       Boolean  @default(false)
+  googleFormsWebhookSecret String?  // Secret for validating incoming webhooks
+  googleFormsUrl           String?  // URL of the registration form (for reference)
+  googleFormsAutoApprove   Boolean  @default(false) // Auto-approve registrations
+  
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

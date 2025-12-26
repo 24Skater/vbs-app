@@ -166,12 +166,35 @@ export default async function Home() {
             )}
 
             {/* Main CTA */}
-            <div className="mt-10 flex items-center justify-center gap-x-6">
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+              {/* Registration Button (if Google Forms enabled) */}
+              {settings.googleFormsEnabled && settings.googleFormsUrl && (
+                <a
+                  href={settings.googleFormsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-md px-6 py-3 text-base font-semibold shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style={{ backgroundColor: settings.primaryColor, color: 'white' }}
+                >
+                  Register Now →
+                </a>
+              )}
+              
               {session?.user ? (
                 <Link
                   href="/dashboard"
                   className="rounded-md px-6 py-3 text-base font-semibold shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                  style={{ backgroundColor: settings.primaryColor, color: 'white' }}
+                  style={{ 
+                    backgroundColor: settings.googleFormsEnabled && settings.googleFormsUrl 
+                      ? 'transparent' 
+                      : settings.primaryColor, 
+                    color: settings.googleFormsEnabled && settings.googleFormsUrl 
+                      ? settings.primaryColor 
+                      : 'white',
+                    border: settings.googleFormsEnabled && settings.googleFormsUrl 
+                      ? `2px solid ${settings.primaryColor}` 
+                      : 'none'
+                  }}
                 >
                   Go to Dashboard
                 </Link>
@@ -179,9 +202,19 @@ export default async function Home() {
                 <Link
                   href="/auth/signin"
                   className="rounded-md px-6 py-3 text-base font-semibold shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                  style={{ backgroundColor: settings.primaryColor, color: 'white' }}
+                  style={{ 
+                    backgroundColor: settings.googleFormsEnabled && settings.googleFormsUrl 
+                      ? 'transparent' 
+                      : settings.primaryColor, 
+                    color: settings.googleFormsEnabled && settings.googleFormsUrl 
+                      ? settings.primaryColor 
+                      : 'white',
+                    border: settings.googleFormsEnabled && settings.googleFormsUrl 
+                      ? `2px solid ${settings.primaryColor}` 
+                      : 'none'
+                  }}
                 >
-                  Sign In
+                  Staff Sign In
                 </Link>
               )}
             </div>

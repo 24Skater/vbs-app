@@ -12,6 +12,7 @@ export default function AdminNav() {
     { href: "/admin/users", label: "Users" },
     { href: "/admin/teachers", label: "Teachers" },
     { href: "/admin/categories", label: "Categories" },
+    { href: "/admin/integrations/google-forms", label: "Google Forms" },
     { href: "/admin/settings", label: "Settings" },
   ];
 
