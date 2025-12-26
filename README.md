@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🏕️ VBS App
+# ✝️ VBS App
 
 ### Vacation Bible School Management System
 
-*A modern, full-featured solution for managing your VBS events*
+*Built for the Church, by a follower of Christ*
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Node.js](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)
@@ -22,6 +22,33 @@
 **A comprehensive, self-hosted application for managing Vacation Bible School events, students, attendance, and schedules.**
 
 </div>
+
+---
+
+## ✝️ Why I Built This
+
+> *"Whatever you do, work at it with all your heart, as working for the Lord."* — Colossians 3:23
+
+I am a follower of **Jesus Christ** — my Lord and Savior who died on the cross for my sins and rose again three days later. I believe He is the only way to salvation and eternal life.
+
+**I built VBS App because I saw a need in the Church.**
+
+When I looked for software to help churches manage their Vacation Bible School programs, I found very few options — and most were either expensive, outdated, or didn't meet the real needs of church volunteers and staff. Churches shouldn't have to struggle with spreadsheets or pay high fees just to organize an event that shares the Gospel with children.
+
+**This is my offering to the Body of Christ.**
+
+VBS App is:
+- 🆓 **Free and open source** — No licensing fees, ever
+- ⛪ **Built for churches** — By someone who understands ministry
+- 🔒 **Self-hosted** — Your data stays with your church
+- 🛠️ **Modern & maintainable** — Built with current technology
+- 🤝 **Community-driven** — Contributions welcome from fellow believers
+
+My prayer is that this tool helps churches focus on what matters most: **sharing the love of Jesus with the next generation.**
+
+> *"Let the little children come to me, and do not hinder them, for the kingdom of heaven belongs to such as these."* — Matthew 19:14
+
+---
 
 ## Features
 
