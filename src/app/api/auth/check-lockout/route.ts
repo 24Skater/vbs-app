@@ -9,8 +9,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Email required" }, { status: 400 });
   }
 
-  const locked = isAccountLocked(email);
-  const remaining = locked ? getLockoutRemaining(email) : null;
+  const locked = await isAccountLocked(email);
+  const remaining = locked ? await getLockoutRemaining(email) : null;
 
   return NextResponse.json({
     locked,

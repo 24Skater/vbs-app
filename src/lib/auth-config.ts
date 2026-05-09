@@ -166,9 +166,9 @@ export const authOptions = {
 
       // Check if account is locked (for email verification requests)
       if (email?.verificationRequest && user.email) {
-        if (isAccountLocked(user.email)) {
-          const remaining = getLockoutRemaining(user.email);
-          recordLoginAttempt(user.email, false);
+        if (await isAccountLocked(user.email)) {
+          const remaining = await getLockoutRemaining(user.email);
+          await recordLoginAttempt(user.email, false);
           throw new Error(
             `Account locked due to too many failed attempts. Please try again in ${Math.ceil((remaining || 0) / 60)} minutes.`
           );
@@ -185,7 +185,7 @@ export const authOptions = {
 
         // If user exists and is verified, this is a successful login
         if (dbUser?.emailVerified) {
-          recordLoginAttempt(user.email, true);
+          await recordLoginAttempt(user.email, true);
         }
 
         // Check for pending invitation and assign role for new OAuth users

@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
   // Rate limiting for authentication endpoints
   if (path.startsWith("/api/auth/signin") || path.startsWith("/api/auth/callback")) {
     const identifier = getClientIdentifier(request);
-    const rateLimit = checkRateLimit(identifier, {
+    const rateLimit = await checkRateLimit(identifier, {
       windowMs: RATE_LIMIT_WINDOW_MS,
       maxRequests: RATE_LIMIT_MAX_REQUESTS,
     });
