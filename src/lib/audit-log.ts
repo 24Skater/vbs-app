@@ -1,4 +1,5 @@
 import 'server-only'
+import { Prisma } from '@prisma/client'
 import { prisma } from './prisma'
 import { logger } from './logger'
 
@@ -40,7 +41,7 @@ export async function auditLog(entry: AuditLogEntry): Promise<void> {
         action: entry.action,
         resourceType: entry.resourceType ?? null,
         resourceId: entry.resourceId ?? null,
-        details: entry.details ?? null,
+        details: entry.details != null ? (entry.details as unknown as Prisma.InputJsonValue) : Prisma.DbNull,
         ipAddress: entry.ipAddress ?? null,
         userAgent: entry.userAgent ?? null,
       },
