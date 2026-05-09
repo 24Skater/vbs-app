@@ -4,6 +4,7 @@
  */
 import "server-only";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import { logger } from "@/lib/logger";
 import EmailProvider from "next-auth/providers/email";
 import GoogleProvider from "next-auth/providers/google";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
@@ -99,9 +100,7 @@ export const authOptions = {
       sendVerificationRequest: async ({ identifier, url, provider }) => {
         // If no email server is configured, log the link instead
         if (!process.env.EMAIL_SERVER_HOST) {
-          console.log("\n📧 DEVELOPMENT MODE - Magic Link:");
-          console.log(`   Email: ${identifier}`);
-          console.log(`   Link: ${url}\n`);
+          logger.info({ identifier, url }, "DEVELOPMENT MODE - Magic Link");
           return;
         }
         // Production: send actual email
@@ -111,17 +110,16 @@ export const authOptions = {
           if (!serverConfig) {
             throw new Error("Email server configuration is missing");
           }
-          
-          console.log(`📧 Attempting to send email to ${identifier}...`);
-          console.log(`   From: ${provider.from}`);
-          
+
+          logger.info({ identifier, from: provider.from }, "Attempting to send magic link email");
+
           const nodemailer = await import("nodemailer");
           const transport = nodemailer.createTransport(serverConfig);
-          
+
           // Verify connection first
           await transport.verify();
-          console.log(`✅ SMTP connection verified`);
-          
+          logger.info("SMTP connection verified");
+
           const result = await transport.sendMail({
             to: identifier,
             from: provider.from,
@@ -129,22 +127,12 @@ export const authOptions = {
             text: `Sign in to ${host}\n\n${url}\n\n`,
             html: `<p>Sign in to ${host}</p><p><a href="${url}">${url}</a></p>`,
           });
-          
-          console.log(`✅ Magic link email sent to ${identifier}`);
-          console.log(`   Message ID: ${result.messageId}`);
-          // Also log the link as backup in case email is delayed or in spam
-          console.log(`\n📧 BACKUP - Magic Link (if email not received, use this):`);
-          console.log(`   Email: ${identifier}`);
-          console.log(`   Link: ${url}\n`);
+
+          logger.info({ identifier, messageId: result.messageId }, "Magic link email sent");
         } catch (error: any) {
-          console.error("❌ Failed to send email:", error.message);
-          if (error.response) {
-            console.error("   SendGrid response:", error.response);
-          }
+          logger.error({ err: error.message, response: error.response }, "Failed to send magic link email");
           // Log the magic link as fallback so user can still sign in
-          console.log("\n📧 EMAIL SEND FAILED - Magic Link (use this to sign in):");
-          console.log(`   Email: ${identifier}`);
-          console.log(`   Link: ${url}\n`);
+          logger.info({ identifier, url }, "EMAIL SEND FAILED - Magic Link fallback");
           // Don't throw - the verification token is still created, so the link will work
           // This allows users to sign in even if email sending fails
         }
@@ -197,7 +185,7 @@ export const authOptions = {
               data: { role: invitedRole },
             });
             await markInvitationUsedByEmail(user.email);
-            console.log(`✅ Applied invited role ${invitedRole} to ${user.email}`);
+            logger.info({ role: invitedRole, email: user.email }, "Applied invited role to user");
           }
         }
 

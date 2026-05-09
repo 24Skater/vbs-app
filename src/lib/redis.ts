@@ -1,5 +1,6 @@
 import 'server-only'
 import Redis from 'ioredis'
+import { logger } from './logger'
 
 let _client: Redis | null = null
 
@@ -20,7 +21,7 @@ function createClient(): Redis {
   })
 
   client.on('error', (err) => {
-    console.error('[redis] Connection error:', err.message)
+    logger.error({ err: err.message }, '[redis] Connection error')
   })
 
   return client

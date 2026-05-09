@@ -1,5 +1,6 @@
 import 'server-only'
 import { prisma } from './prisma'
+import { logger } from './logger'
 
 export type AuditAction =
   | 'USER_ROLE_CHANGED'
@@ -46,6 +47,6 @@ export async function auditLog(entry: AuditLogEntry): Promise<void> {
     })
   } catch (error) {
     // Audit failures must never break the app
-    console.error('[audit] Failed to write audit log:', error)
+    logger.error({ error }, '[audit] Failed to write audit log')
   }
 }
