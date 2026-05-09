@@ -22,7 +22,6 @@ export const authOptions = {
           GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            allowDangerousEmailAccountLinking: true,
           }),
         ]
       : []),
@@ -35,7 +34,6 @@ export const authOptions = {
             issuer: process.env.AZURE_AD_TENANT_ID
               ? `https://login.microsoftonline.com/${process.env.AZURE_AD_TENANT_ID}/v2.0`
               : "https://login.microsoftonline.com/common/v2.0",
-            allowDangerousEmailAccountLinking: true,
           }),
         ]
       : []),
