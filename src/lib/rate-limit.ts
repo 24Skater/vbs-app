@@ -58,10 +58,17 @@ export async function checkRateLimit(
     const key = `rl:${identifier}`
     const windowSec = Math.ceil(windowMs / 1000)
 
-    const count = await redis.incr(key)
-    if (count === 1) await redis.expire(key, windowSec)
-
-    const ttl = await redis.ttl(key)
+    const luaScript = `
+      local count = redis.call('INCR', KEYS[1])
+      if count == 1 then
+        redis.call('EXPIRE', KEYS[1], ARGV[1])
+      end
+      local ttl = redis.call('TTL', KEYS[1])
+      return {count, ttl}
+    `
+    const result = await redis.eval(luaScript, 1, key, String(windowSec)) as [number, number]
+    const count = result[0]
+    const ttl = result[1] > 0 ? result[1] : windowSec
     const actualResetAt = now + ttl * 1000
 
     if (count > maxRequests) {

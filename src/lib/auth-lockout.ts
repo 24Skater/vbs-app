@@ -30,11 +30,22 @@ async function _tryGetRedis() {
 
 export async function recordLoginAttempt(email: string, success: boolean): Promise<void> {
   const redis = await _tryGetRedis()
-  const windowSec = Math.ceil(LOCKOUT_WINDOW_MS / 1000)
+  const key = `lockout:${email}`
 
+  if (success) {
+    // Clear lockout state on successful login
+    if (redis) {
+      await redis.del(key)
+    } else {
+      _memAttempts.delete(email)
+    }
+    return
+  }
+
+  // Record failure
+  const windowSec = Math.ceil(LOCKOUT_WINDOW_MS / 1000)
   if (redis) {
-    const key = `lockout:${email}`
-    await redis.lpush(key, JSON.stringify({ ts: Date.now(), success }))
+    await redis.lpush(key, JSON.stringify({ ts: Date.now(), success: false }))
     await redis.expire(key, windowSec)
     return
   }
@@ -44,7 +55,7 @@ export async function recordLoginAttempt(email: string, success: boolean): Promi
   }
 
   const existing = _memAttempts.get(email) ?? []
-  existing.push({ ts: Date.now(), success })
+  existing.push({ ts: Date.now(), success: false })
   _memAttempts.set(email, existing)
 }
 
@@ -58,6 +69,10 @@ async function _getRecentFailureCount(email: string): Promise<number> {
       const parsed = JSON.parse(e) as { ts: number; success: boolean }
       return !parsed.success && parsed.ts > cutoff
     }).length
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Account lockout check requires Redis in production')
   }
 
   return (_memAttempts.get(email) ?? []).filter((a) => !a.success && a.ts > cutoff).length
@@ -74,6 +89,10 @@ async function _getLastFailureTs(email: string): Promise<number | null> {
       .filter((e) => !e.success && e.ts > cutoff)
       .map((e) => e.ts)
     return failureTimes.length ? Math.max(...failureTimes) : null
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Account lockout check requires Redis in production')
   }
 
   const failures = (_memAttempts.get(email) ?? []).filter((a) => !a.success && a.ts > cutoff)
