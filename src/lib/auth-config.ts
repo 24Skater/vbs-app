@@ -202,12 +202,11 @@ export const authOptions = {
         }
 
         // Require email verification for new users
-        // Allow first-time sign-in to create account, but require verification for subsequent logins
-        if (dbUser && !dbUser.emailVerified) {
-          // In production, you might want to be stricter and require verification
-          // For now, we'll allow it but log it
-          if (process.env.NODE_ENV === "development") {
-            console.warn(`Unverified user attempting to sign in: ${user.email}`);
+        // Enforce email verification in production for credentials sign-in
+        // OAuth providers (Google, Microsoft) verify email on their side
+        if (dbUser && !dbUser.emailVerified && account?.provider === 'credentials') {
+          if (process.env.NODE_ENV === 'production') {
+            return false
           }
         }
       }
