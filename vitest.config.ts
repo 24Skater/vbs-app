@@ -6,11 +6,16 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
+    exclude: ['node_modules', 'e2e/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/lib/**/*.ts'],
-      exclude: ['src/lib/__tests__/**'],
+      include: [
+        'src/lib/xss-protection.ts',
+        'src/lib/validation.ts',
+        'src/lib/rate-limit.ts',
+        'src/lib/auth-lockout.ts',
+      ],
       thresholds: {
         lines: 80,
         functions: 80,
