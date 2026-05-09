@@ -220,26 +220,41 @@ export const authOptions = {
         token.email = user.email;
         token.name = user.name;
         token.role = user.role;
+        // Fetch sessionVersion to detect role/password changes
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { sessionVersion: true },
+        });
+        token.sessionVersion = dbUser?.sessionVersion ?? 1;
       }
-      
+
       // For OAuth/email providers, fetch role from database
       if (account && account.provider !== "credentials" && token.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: token.email },
-          select: { id: true, role: true },
+          select: { id: true, role: true, sessionVersion: true },
         });
         if (dbUser) {
           token.id = dbUser.id;
           token.role = dbUser.role;
+          token.sessionVersion = dbUser.sessionVersion;
         }
       }
-      
+
       return token;
     },
     async session({ session, token }: any) {
-      if (session.user && token) {
+      if (token && session.user) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id },
+          select: { sessionVersion: true, role: true },
+        });
+        if (!dbUser || dbUser.sessionVersion !== token.sessionVersion) {
+          // Token is stale — reject the session
+          return { ...session, user: null, expires: new Date(0).toISOString() };
+        }
         session.user.id = token.id;
-        session.user.role = (token.role as UserRole) || "VIEWER";
+        session.user.role = dbUser.role;
       }
       return session;
     },
