@@ -24,13 +24,13 @@ export default defineConfig({
     // Public tests — no auth required
     {
       name: "public",
-      testMatch: /\/(auth|admin-protection)\.spec\.ts/,
+      testMatch: /\/(auth-flow|auth|admin-protection|register)\.spec\.ts/,
       use: { ...devices["Desktop Chrome"] },
     },
     // Authenticated tests — depend on setup
     {
       name: "authenticated",
-      testMatch: /\/(student-crud|checkin|register)\.spec\.ts/,
+      testMatch: /\/(student-crud|checkin|dashboard|admin)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         storageState: "playwright/.auth/admin.json",
