@@ -184,6 +184,7 @@ model Student {
   grade           String?
   allergies       String?   // Medical/allergy notes
   medicalNotes    String?
+  photoConsent    Boolean   @default(false)
   notes           String?   // General notes
   
   // Legacy single parent/emergency (kept for backward compatibility)
