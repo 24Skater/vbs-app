@@ -53,7 +53,7 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 # Copy Prisma schema and migrations for runtime migrations
 COPY --from=builder /app/prisma ./prisma
 COPY scripts/start.sh /app/scripts/start.sh
-RUN chmod +x /app/scripts/start.sh
+RUN sed -i 's/\r$//' /app/scripts/start.sh && chmod +x /app/scripts/start.sh
 
 USER nextjs
 

@@ -49,7 +49,7 @@ export default async function CheckInPage({ searchParams }: PageProps) {
   const students = hasFilter
     ? await prisma.student.findMany({
         where: {
-          eventId: event.id,
+          events: { some: { eventId: event.id } },
           ...(q.length >= 2
             ? { name: { contains: q, mode: "insensitive" } }
             : {}),
