@@ -1,8 +1,31 @@
-import { test as setup, expect } from "@playwright/test";
+import { test as setup } from "@playwright/test";
+import { spawnSync } from "child_process";
 import { TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD } from "./helpers/auth";
 
 // This runs once before authenticated specs. It registers a test admin user
-// (if not already registered) and saves session cookies to playwright/.auth/admin.json.
+// (if not already registered), upgrades them to ADMIN role, and saves session
+// cookies to playwright/.auth/admin.json.
+
+function upgradeTestAdminRole() {
+  const result = spawnSync(
+    "docker",
+    [
+      "exec",
+      "vbs-app-db-1",
+      "psql",
+      "-U",
+      "postgres",
+      "-d",
+      "vbsdb",
+      "-c",
+      `UPDATE "User" SET role = 'ADMIN' WHERE email = '${TEST_ADMIN_EMAIL}'`,
+    ],
+    { encoding: "utf8" }
+  );
+  if (result.status !== 0) {
+    console.warn("Could not upgrade test admin role via docker exec:", result.stderr);
+  }
+}
 
 setup("create test admin session", async ({ page }) => {
   // Try to register the test admin user — idempotent (server ignores duplicate email)
@@ -13,6 +36,9 @@ setup("create test admin session", async ({ page }) => {
       name: "E2E Admin",
     },
   });
+
+  // Ensure the test user has ADMIN role (registration defaults to VIEWER)
+  upgradeTestAdminRole();
 
   // Sign in
   await page.goto("/auth/signin");

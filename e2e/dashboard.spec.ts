@@ -11,7 +11,8 @@ test.describe("Dashboard", () => {
 
   test("does not show raw errors on screen", async ({ page }) => {
     await page.goto("/dashboard");
-    const body = await page.locator("body").textContent();
+    // Use innerText (not textContent) to exclude <script>/<style> content from RSC flight data
+    const body = await page.locator("body").innerText();
     expect(body).not.toMatch(/prisma|unhandled|500|stack trace/i);
   });
 

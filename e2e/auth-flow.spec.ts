@@ -24,16 +24,12 @@ test.describe("Sign-in page", () => {
 
   test("has a link to forgot-password", async ({ page }) => {
     await page.goto("/auth/signin");
-    await expect(
-      page.locator('a[href*="forgot-password"], a:has-text(/forgot/i)')
-    ).toBeVisible();
+    await expect(page.locator('a[href*="forgot-password"]')).toBeVisible();
   });
 
   test("has a link to register", async ({ page }) => {
     await page.goto("/auth/signin");
-    await expect(
-      page.locator('a[href*="register"], a:has-text(/register|sign up/i)')
-    ).toBeVisible();
+    await expect(page.locator('a[href*="register"]')).toBeVisible();
   });
 });
 

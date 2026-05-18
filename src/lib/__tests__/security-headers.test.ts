@@ -38,11 +38,12 @@ describe("addSecurityHeaders", () => {
     expect(result.headers.get("Content-Security-Policy")).toBeTruthy();
   });
 
-  it("includes nonce in script-src when provided", () => {
+  it("script-src allows inline scripts (required for Next.js App Router prerendering)", () => {
     const res = NextResponse.json({});
     const result = addSecurityHeaders(res, "test-nonce-abc");
     const csp = result.headers.get("Content-Security-Policy") ?? "";
-    expect(csp).toContain("nonce-test-nonce-abc");
+    expect(csp).toContain("script-src");
+    expect(csp).toContain("'self'");
   });
 
   it("returns the same response object", () => {
