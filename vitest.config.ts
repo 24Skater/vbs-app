@@ -15,6 +15,7 @@ export default defineConfig({
         'src/lib/validation.ts',
         'src/lib/rate-limit.ts',
         'src/lib/auth-lockout.ts',
+        'src/lib/image-validation.ts',
       ],
       thresholds: {
         lines: 80,
